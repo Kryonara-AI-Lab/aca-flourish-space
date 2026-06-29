@@ -26,7 +26,7 @@ function DisclaimerPage() {
       <Section title="Third-party content">
         <p>Some materials you choose to upload may be authored by others (e.g. lecture handouts, past exams). You are responsible for ensuring you have the right to store such materials in your private library.</p>
       </Section>
-      <Section title="Service "as is"">
+      <Section title={`Service "as is"`}>
         <p>Lumio is provided on an "as is" and "as available" basis without warranties of any kind, express or implied, including merchantability, fitness for a particular purpose or non-infringement.</p>
       </Section>
     </LegalLayout>
