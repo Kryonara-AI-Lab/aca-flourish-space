@@ -150,6 +150,7 @@ function Settings() {
       </header>
 
       <AiUsageCard />
+      <VoiceCard />
 
       {/* Profile */}
       <section className="surface p-6">
