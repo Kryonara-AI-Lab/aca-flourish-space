@@ -17,7 +17,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTeachRouteImport } from './routes/api/teach'
-import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated/upload'
 import { Route as AuthenticatedStudyRouteImport } from './routes/_authenticated/study'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
@@ -64,11 +63,6 @@ const ApiTeachRoute = ApiTeachRouteImport.update({
   id: '/api/teach',
   path: '/api/teach',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedUploadRoute = AuthenticatedUploadRouteImport.update({
-  id: '/upload',
-  path: '/upload',
-  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedStudyRoute = AuthenticatedStudyRouteImport.update({
   id: '/study',
@@ -119,7 +113,6 @@ export interface FileRoutesByFullPath {
   '/library': typeof AuthenticatedLibraryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/study': typeof AuthenticatedStudyRoute
-  '/upload': typeof AuthenticatedUploadRoute
   '/api/teach': typeof ApiTeachRoute
   '/sets/$id': typeof AuthenticatedSetsIdRoute
 }
@@ -136,7 +129,6 @@ export interface FileRoutesByTo {
   '/library': typeof AuthenticatedLibraryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/study': typeof AuthenticatedStudyRoute
-  '/upload': typeof AuthenticatedUploadRoute
   '/api/teach': typeof ApiTeachRoute
   '/sets/$id': typeof AuthenticatedSetsIdRoute
 }
@@ -155,7 +147,6 @@ export interface FileRoutesById {
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/study': typeof AuthenticatedStudyRoute
-  '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/api/teach': typeof ApiTeachRoute
   '/_authenticated/sets/$id': typeof AuthenticatedSetsIdRoute
 }
@@ -174,7 +165,6 @@ export interface FileRouteTypes {
     | '/library'
     | '/settings'
     | '/study'
-    | '/upload'
     | '/api/teach'
     | '/sets/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -191,7 +181,6 @@ export interface FileRouteTypes {
     | '/library'
     | '/settings'
     | '/study'
-    | '/upload'
     | '/api/teach'
     | '/sets/$id'
   id:
@@ -209,7 +198,6 @@ export interface FileRouteTypes {
     | '/_authenticated/library'
     | '/_authenticated/settings'
     | '/_authenticated/study'
-    | '/_authenticated/upload'
     | '/api/teach'
     | '/_authenticated/sets/$id'
   fileRoutesById: FileRoutesById
@@ -283,13 +271,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTeachRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/upload': {
-      id: '/_authenticated/upload'
-      path: '/upload'
-      fullPath: '/upload'
-      preLoaderRoute: typeof AuthenticatedUploadRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/study': {
       id: '/_authenticated/study'
       path: '/study'
@@ -349,7 +330,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedStudyRoute: typeof AuthenticatedStudyRoute
-  AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
   AuthenticatedSetsIdRoute: typeof AuthenticatedSetsIdRoute
 }
 
@@ -360,7 +340,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedStudyRoute: AuthenticatedStudyRoute,
-  AuthenticatedUploadRoute: AuthenticatedUploadRoute,
   AuthenticatedSetsIdRoute: AuthenticatedSetsIdRoute,
 }
 
