@@ -17,7 +17,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated/upload'
-import { Route as AuthenticatedTestsRouteImport } from './routes/_authenticated/tests'
 import { Route as AuthenticatedStudyRouteImport } from './routes/_authenticated/study'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
@@ -63,11 +62,6 @@ const IndexRoute = IndexRouteImport.update({
 const AuthenticatedUploadRoute = AuthenticatedUploadRouteImport.update({
   id: '/upload',
   path: '/upload',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedTestsRoute = AuthenticatedTestsRouteImport.update({
-  id: '/tests',
-  path: '/tests',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedStudyRoute = AuthenticatedStudyRouteImport.update({
@@ -119,7 +113,6 @@ export interface FileRoutesByFullPath {
   '/library': typeof AuthenticatedLibraryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/study': typeof AuthenticatedStudyRoute
-  '/tests': typeof AuthenticatedTestsRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/sets/$id': typeof AuthenticatedSetsIdRoute
 }
@@ -136,7 +129,6 @@ export interface FileRoutesByTo {
   '/library': typeof AuthenticatedLibraryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/study': typeof AuthenticatedStudyRoute
-  '/tests': typeof AuthenticatedTestsRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/sets/$id': typeof AuthenticatedSetsIdRoute
 }
@@ -155,7 +147,6 @@ export interface FileRoutesById {
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/study': typeof AuthenticatedStudyRoute
-  '/_authenticated/tests': typeof AuthenticatedTestsRoute
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/_authenticated/sets/$id': typeof AuthenticatedSetsIdRoute
 }
@@ -174,7 +165,6 @@ export interface FileRouteTypes {
     | '/library'
     | '/settings'
     | '/study'
-    | '/tests'
     | '/upload'
     | '/sets/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -191,7 +181,6 @@ export interface FileRouteTypes {
     | '/library'
     | '/settings'
     | '/study'
-    | '/tests'
     | '/upload'
     | '/sets/$id'
   id:
@@ -209,7 +198,6 @@ export interface FileRouteTypes {
     | '/_authenticated/library'
     | '/_authenticated/settings'
     | '/_authenticated/study'
-    | '/_authenticated/tests'
     | '/_authenticated/upload'
     | '/_authenticated/sets/$id'
   fileRoutesById: FileRoutesById
@@ -282,13 +270,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUploadRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/tests': {
-      id: '/_authenticated/tests'
-      path: '/tests'
-      fullPath: '/tests'
-      preLoaderRoute: typeof AuthenticatedTestsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/study': {
       id: '/_authenticated/study'
       path: '/study'
@@ -348,7 +329,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedStudyRoute: typeof AuthenticatedStudyRoute
-  AuthenticatedTestsRoute: typeof AuthenticatedTestsRoute
   AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
   AuthenticatedSetsIdRoute: typeof AuthenticatedSetsIdRoute
 }
@@ -360,7 +340,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedStudyRoute: AuthenticatedStudyRoute,
-  AuthenticatedTestsRoute: AuthenticatedTestsRoute,
   AuthenticatedUploadRoute: AuthenticatedUploadRoute,
   AuthenticatedSetsIdRoute: AuthenticatedSetsIdRoute,
 }
