@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
@@ -13,6 +13,11 @@ import {
   Timer,
   Trophy,
   X,
+  Play,
+  Maximize2,
+  Minimize2,
+  AlertTriangle,
+  BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -63,7 +68,112 @@ function SetPlayPage() {
       </div>
     );
 
-  return data.kind === "study" ? <FlashcardPlayer set={data} /> : <QuizPlayer set={data} />;
+  if (data.kind === "study") return <FlashcardPlayer set={data} />;
+  if (data.kind === "exam") return <ExamShell set={data} />;
+  return <QuizPlayer set={data} />;
+}
+
+function ExamShell({ set }: { set: SetRow }) {
+  const [started, setStarted] = useState(false);
+  const [isFs, setIsFs] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onFs = () => setIsFs(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFs);
+    return () => document.removeEventListener("fullscreenchange", onFs);
+  }, []);
+
+  const enterFs = async () => {
+    const el = containerRef.current;
+    if (el?.requestFullscreen) {
+      try { await el.requestFullscreen(); } catch { /* ignored */ }
+    }
+  };
+  const exitFs = async () => {
+    if (document.fullscreenElement) {
+      try { await document.exitFullscreen(); } catch { /* ignored */ }
+    }
+  };
+
+  const start = async () => {
+    setStarted(true);
+    await enterFs();
+  };
+
+  if (!started) {
+    const mins = set.time_limit_minutes ?? 0;
+    return (
+      <div className="max-w-2xl mx-auto animate-fade-up">
+        <BackTo kind={set.kind} />
+        <div className="surface mt-6 overflow-hidden">
+          <div className="bg-primary-soft p-6 border-b border-border">
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-elev-1">
+                <BookOpen className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-widest text-primary font-semibold">Exam</div>
+                <h1 className="text-2xl font-bold tracking-tight leading-tight">{set.title}</h1>
+                {set.subject && <p className="text-sm text-muted-foreground mt-0.5">{set.subject}</p>}
+              </div>
+            </div>
+          </div>
+          <div className="p-6 space-y-5">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg border border-border bg-card p-4">
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Questions</div>
+                <div className="mt-1 text-2xl font-bold">{set.questions.length}</div>
+              </div>
+              <div className="rounded-lg border border-border bg-card p-4">
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Time limit</div>
+                <div className="mt-1 text-2xl font-bold flex items-center gap-1.5">
+                  <Timer className="h-5 w-5 text-primary" /> {mins} min
+                </div>
+              </div>
+            </div>
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 flex gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-sm text-foreground/80 space-y-1.5">
+                <p className="font-medium">Before you start:</p>
+                <ul className="text-xs list-disc pl-4 space-y-0.5 text-muted-foreground">
+                  <li>The exam will open in fullscreen. Stay focused — leaving fullscreen won't submit, but it breaks concentration.</li>
+                  <li>The timer auto-submits your exam when it runs out.</li>
+                  <li>You can navigate freely between questions with the palette on the right.</li>
+                </ul>
+              </div>
+            </div>
+            <button
+              onClick={start}
+              className="ripple w-full inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground px-5 py-3.5 text-sm font-semibold shadow-elev-1 hover:shadow-glow transition-all"
+            >
+              <Play className="h-4 w-4" /> Start exam
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className={`bg-background ${isFs ? "fixed inset-0 z-50 overflow-y-auto" : ""}`}
+    >
+      <div className={`${isFs ? "min-h-screen py-8 px-4 sm:px-8" : ""}`}>
+        <div className="max-w-3xl mx-auto flex items-center justify-end mb-3">
+          <button
+            onClick={isFs ? exitFs : enterFs}
+            className="ripple inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium hover:border-primary/40 transition-colors"
+            aria-label={isFs ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            {isFs ? <><Minimize2 className="h-3.5 w-3.5" /> Exit fullscreen</> : <><Maximize2 className="h-3.5 w-3.5" /> Fullscreen</>}
+          </button>
+        </div>
+        <QuizPlayer set={set} onExit={exitFs} />
+      </div>
+    </div>
+  );
 }
 
 function BackTo({ kind }: { kind: SetRow["kind"] }) {
@@ -148,7 +258,7 @@ function FlashcardPlayer({ set }: { set: SetRow }) {
   );
 }
 
-function QuizPlayer({ set }: { set: SetRow }) {
+function QuizPlayer({ set, onExit }: { set: SetRow; onExit?: () => void }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [answers, setAnswers] = useState<(string | null)[]>(() => set.questions.map(() => null));
@@ -197,6 +307,7 @@ function QuizPlayer({ set }: { set: SetRow }) {
       });
       qc.invalidateQueries({ queryKey: ["attempts"] });
     }
+    if (onExit) await onExit();
   }
 
   if (submitted) {

@@ -10,6 +10,7 @@ import {
   BookOpenCheck,
   GraduationCap,
   CreditCard,
+  Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { LumioWordmark } from "@/components/Logo";
@@ -21,6 +22,7 @@ const NAV = [
   { to: "/library", label: "Library", icon: FolderOpen, group: "main" },
   { to: "/study", label: "Study", icon: BookOpenCheck, group: "learn" },
   { to: "/exams", label: "Take an exam", icon: GraduationCap, group: "learn" },
+  { to: "/lumio", label: "Lumio", icon: Users, group: "social" },
   { to: "/billing", label: "Billing", icon: CreditCard, group: "account" },
   { to: "/settings", label: "Settings", icon: Settings, group: "account" },
 ] as const;
@@ -28,6 +30,7 @@ const NAV = [
 const GROUP_LABELS: Record<string, string> = {
   main: "Library",
   learn: "Learn",
+  social: "Community",
   account: "Account",
 };
 

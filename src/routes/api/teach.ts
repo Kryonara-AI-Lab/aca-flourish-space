@@ -3,7 +3,12 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { styleById } from "@/lib/teaching-styles";
 
-type Body = { materialId?: unknown; styleId?: unknown };
+type Body = {
+  materialId?: unknown;
+  styleId?: unknown;
+  page?: unknown;
+  previousSummary?: unknown;
+};
 
 export const Route = createFileRoute("/api/teach")({
   server: {
@@ -25,6 +30,8 @@ export const Route = createFileRoute("/api/teach")({
         const materialId = typeof body.materialId === "string" ? body.materialId : null;
         const styleIdRaw = typeof body.styleId === "string" ? body.styleId : null;
         if (!materialId) return new Response("materialId required", { status: 400 });
+        const page = typeof body.page === "number" && body.page > 0 ? Math.min(20, Math.floor(body.page)) : 1;
+        const previousSummary = typeof body.previousSummary === "string" ? body.previousSummary.slice(0, 4000) : "";
 
         const supabase = createClient<Database>(supaUrl, supaKey, {
           global: { headers: { Authorization: authHeader } },
@@ -57,7 +64,20 @@ export const Route = createFileRoute("/api/teach")({
         const dataUrl = `data:${mat.mime_type || "application/pdf"};base64,${btoa(bin)}`;
 
         const style = styleById(styleIdRaw);
-        const userMsg = `Teach me everything I need to understand the attached material titled "${mat.title}"${mat.subject ? ` (${mat.subject})` : ""}. Treat me as a complete beginner. Use the document as your source. Follow the style and formatting rules in your instructions.`;
+        const firstPageMsg = `Teach me everything I need to understand the attached material titled "${mat.title}"${mat.subject ? ` (${mat.subject})` : ""}. Treat me as a complete beginner.
+
+This is **Page 1** of a multi-page lesson. Cover the foundational concepts a beginner needs first. Keep it focused (~500–800 words). End with a one-line teaser like "*Next up: …*" hinting at what page 2 will cover deeper. Do NOT try to fit everything into this page — leave room to go deeper on later pages. Follow the style and formatting rules in your instructions.`;
+
+        const nextPageMsg = `Continue teaching the attached material titled "${mat.title}"${mat.subject ? ` (${mat.subject})` : ""}. This is **Page ${page}** of a progressive lesson.
+
+Here is a compact summary of what has already been covered on earlier pages:
+"""
+${previousSummary || "(nothing yet)"}
+"""
+
+Now go DEEPER. Do not repeat what was already covered — build on it. Introduce the next layer of concepts, edge cases, worked examples, formulas, or nuances that a student should learn AFTER the previous page. Aim for ~500–800 words. End with a one-line teaser hinting at what page ${page + 1} will explore, unless the topic is fully exhausted (in which case end with "> **Lesson complete.**" instead).`;
+
+        const userMsg = page === 1 ? firstPageMsg : nextPageMsg;
 
         // Log usage (fire-and-forget)
         void supabase.from("ai_usage").insert({ user_id: u.user.id, kind: "study" });
