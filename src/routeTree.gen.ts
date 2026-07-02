@@ -19,6 +19,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTeachRouteImport } from './routes/api/teach'
 import { Route as AuthenticatedStudyRouteImport } from './routes/_authenticated/study'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedLumioRouteImport } from './routes/_authenticated/lumio'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedExamsRouteImport } from './routes/_authenticated/exams'
@@ -75,6 +76,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedLumioRoute = AuthenticatedLumioRouteImport.update({
   id: '/lumio',
   path: '/lumio',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/exams': typeof AuthenticatedExamsRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/lumio': typeof AuthenticatedLumioRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/study': typeof AuthenticatedStudyRoute
   '/api/teach': typeof ApiTeachRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByTo {
   '/exams': typeof AuthenticatedExamsRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/lumio': typeof AuthenticatedLumioRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/study': typeof AuthenticatedStudyRoute
   '/api/teach': typeof ApiTeachRoute
@@ -154,6 +162,7 @@ export interface FileRoutesById {
   '/_authenticated/exams': typeof AuthenticatedExamsRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/lumio': typeof AuthenticatedLumioRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/study': typeof AuthenticatedStudyRoute
   '/api/teach': typeof ApiTeachRoute
@@ -173,6 +182,7 @@ export interface FileRouteTypes {
     | '/exams'
     | '/library'
     | '/lumio'
+    | '/profile'
     | '/settings'
     | '/study'
     | '/api/teach'
@@ -190,6 +200,7 @@ export interface FileRouteTypes {
     | '/exams'
     | '/library'
     | '/lumio'
+    | '/profile'
     | '/settings'
     | '/study'
     | '/api/teach'
@@ -208,6 +219,7 @@ export interface FileRouteTypes {
     | '/_authenticated/exams'
     | '/_authenticated/library'
     | '/_authenticated/lumio'
+    | '/_authenticated/profile'
     | '/_authenticated/settings'
     | '/_authenticated/study'
     | '/api/teach'
@@ -297,6 +309,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/lumio': {
       id: '/_authenticated/lumio'
       path: '/lumio'
@@ -348,6 +367,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedExamsRoute: typeof AuthenticatedExamsRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedLumioRoute: typeof AuthenticatedLumioRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedStudyRoute: typeof AuthenticatedStudyRoute
   AuthenticatedSetsIdRoute: typeof AuthenticatedSetsIdRoute
@@ -359,6 +379,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedExamsRoute: AuthenticatedExamsRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedLumioRoute: AuthenticatedLumioRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedStudyRoute: AuthenticatedStudyRoute,
   AuthenticatedSetsIdRoute: AuthenticatedSetsIdRoute,
