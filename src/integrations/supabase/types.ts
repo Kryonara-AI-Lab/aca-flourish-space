@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_events: {
+        Row: {
+          created_at: string
+          detail: string | null
+          event_type: string
+          id: string
+          ip: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          event_type: string
+          id?: string
+          ip?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          event_type?: string
+          id?: string
+          ip?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_usage: {
         Row: {
           created_at: string
@@ -258,27 +288,42 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
+          current_streak: number
           display_name: string | null
+          honor_score: number
           id: string
+          last_active_date: string | null
+          longest_streak: number
           plan: string
           updated_at: string
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          current_streak?: number
           display_name?: string | null
+          honor_score?: number
           id: string
+          last_active_date?: string | null
+          longest_streak?: number
           plan?: string
           updated_at?: string
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          current_streak?: number
           display_name?: string | null
+          honor_score?: number
           id?: string
+          last_active_date?: string | null
+          longest_streak?: number
           plan?: string
           updated_at?: string
           username?: string | null
@@ -343,7 +388,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      award_honor: {
+        Args: { _activity_type?: string; _points: number }
+        Returns: {
+          current_streak: number
+          honor_score: number
+          longest_streak: number
+        }[]
+      }
     }
     Enums: {
       material_type: "notes" | "homework" | "exam"

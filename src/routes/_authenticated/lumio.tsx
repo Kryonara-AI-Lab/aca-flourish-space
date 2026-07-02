@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -13,6 +13,8 @@ import {
   FileText,
   Sparkles,
   MoreHorizontal,
+  RefreshCw,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -143,8 +145,11 @@ function Feed({ me }: { me: Profile }) {
   const [content, setContent] = useState("");
   const [posting, setPosting] = useState(false);
   const [q, setQ] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const composerRef = useRef<HTMLTextAreaElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  const { data: posts = [], isLoading } = useQuery({
+  const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ["lumio-feed"],
     queryFn: async () => {
       const { data: rawPosts, error } = await supabase
@@ -201,6 +206,37 @@ function Feed({ me }: { me: Profile }) {
     },
   });
 
+  const refresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setTimeout(() => setRefreshing(false), 400);
+  };
+
+  // Simple pull-to-refresh on mobile
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let startY = 0; let pulling = false;
+    const onTouchStart = (e: TouchEvent) => {
+      if (window.scrollY > 4) return;
+      startY = e.touches[0].clientY; pulling = true;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!pulling) return;
+      const dy = e.touches[0].clientY - startY;
+      if (dy > 90) { pulling = false; refresh(); }
+    };
+    const onTouchEnd = () => { pulling = false; };
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: true });
+    el.addEventListener("touchend", onTouchEnd);
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+    };
+  }, []);
+
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
     if (!t) return posts;
@@ -225,14 +261,23 @@ function Feed({ me }: { me: Profile }) {
   };
 
   return (
-    <div className="animate-fade-up max-w-2xl mx-auto space-y-6">
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-          <Users className="h-7 w-7 text-primary" /> Lumio
-        </h1>
-        <p className="mt-1 text-muted-foreground text-sm">
-          Share wins, ask questions, connect with other students. Signed in as <span className="text-foreground font-medium">@{me.username}</span>.
-        </p>
+    <div ref={scrollRef} className="animate-fade-up max-w-2xl mx-auto space-y-5 pb-8">
+      <header className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
+            <Users className="h-6 w-6 text-primary" /> Lumio feed
+          </h1>
+          <p className="mt-1 text-muted-foreground text-xs sm:text-sm">
+            Signed in as <span className="text-foreground font-medium">@{me.username}</span> · pull down or tap refresh
+          </p>
+        </div>
+        <button
+          onClick={refresh}
+          className="p-2.5 rounded-full border border-border bg-card hover:border-primary/40 active:scale-95 transition-all"
+          aria-label="Refresh"
+        >
+          <RefreshCw className={`h-4 w-4 text-primary ${refreshing ? "animate-spin" : ""}`} />
+        </button>
       </header>
 
       <div className="surface p-4 space-y-3">
@@ -240,6 +285,7 @@ function Feed({ me }: { me: Profile }) {
           <Avatar profile={me} />
           <div className="flex-1 space-y-2">
             <textarea
+              ref={composerRef}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="What are you learning today?"
@@ -285,6 +331,15 @@ function Feed({ me }: { me: Profile }) {
           {filtered.map((p) => <PostCard key={p.id} post={p} me={me} />)}
         </ul>
       )}
+
+      {/* Floating quick-compose FAB (mobile only, positioned above bottom nav) */}
+      <button
+        onClick={() => { composerRef.current?.focus(); composerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); }}
+        className="lg:hidden fixed bottom-24 right-4 z-30 h-12 w-12 rounded-full fab-plus flex items-center justify-center active:scale-95 transition-transform"
+        aria-label="New post"
+      >
+        <Plus className="h-5 w-5" strokeWidth={2.6} />
+      </button>
     </div>
   );
 }

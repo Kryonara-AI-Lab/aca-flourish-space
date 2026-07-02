@@ -5,8 +5,9 @@ export function LumioMark({ size = 28 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden>
       <defs>
         <linearGradient id="lumioG" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="oklch(0.82 0.14 80)" />
-          <stop offset="100%" stopColor="oklch(0.66 0.18 55)" />
+          <stop offset="0%" stopColor="#FFF3A8" />
+          <stop offset="60%" stopColor="#FFE04B" />
+          <stop offset="100%" stopColor="#E8B71A" />
         </linearGradient>
       </defs>
       <path
