@@ -62,7 +62,7 @@ function SetPlayPage() {
     return (
       <div className="surface p-10 text-center text-sm text-muted-foreground">
         Couldn't load this set.{" "}
-        <Link to="/dashboard" className="text-primary hover:underline">
+        <Link to="/lumio" className="text-primary hover:underline">
           Go back
         </Link>
       </div>
