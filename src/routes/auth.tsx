@@ -50,7 +50,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/dashboard", replace: true });
+      if (data.user) navigate({ to: "/lumio", replace: true });
     });
   }, [navigate]);
 
@@ -74,7 +74,7 @@ function AuthPage() {
         });
         if (error) throw error;
         toast.success("Account created. Welcome to Lumio!");
-        navigate({ to: "/dashboard", replace: true });
+        navigate({ to: "/lumio", replace: true });
       } else {
         const parsed = signinSchema.safeParse(form);
         if (!parsed.success) {
@@ -98,7 +98,7 @@ function AuthPage() {
           }
         }
         toast.success("Welcome back");
-        navigate({ to: "/dashboard", replace: true });
+        navigate({ to: "/lumio", replace: true });
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Authentication failed");
@@ -124,7 +124,7 @@ function AuthPage() {
       });
       if (error) throw error;
       toast.success("Verified");
-      navigate({ to: "/dashboard", replace: true });
+      navigate({ to: "/lumio", replace: true });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Invalid code");
     } finally {
@@ -141,7 +141,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/dashboard", replace: true });
+    navigate({ to: "/lumio", replace: true });
   };
 
   return (
