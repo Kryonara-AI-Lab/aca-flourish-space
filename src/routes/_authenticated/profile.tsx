@@ -281,7 +281,17 @@ function ProfilePage() {
       </section>
 
       {/* ==== Actions ==== */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <section className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Actions</h2>
+          <button
+            onClick={() => resetOnboarding()}
+            className="text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
+          >
+            <Sparkles className="h-3 w-3" /> Replay welcome tour
+          </button>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <button onClick={() => setShowSecurity((v) => !v)} className="surface-interactive p-5 group flex items-center gap-4 text-left">
           <div className="h-11 w-11 rounded-2xl bg-primary/12 text-primary flex items-center justify-center">
             <ShieldCheck className="h-5 w-5" />
@@ -324,6 +334,7 @@ function ProfilePage() {
             <div className="text-xs text-muted-foreground">End this session on this device</div>
           </div>
         </button>
+        </div>
       </section>
 
       {showSecurity && <SecurityPanel email={me.user.email ?? ""} />}
