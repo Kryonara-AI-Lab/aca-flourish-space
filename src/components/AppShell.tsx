@@ -20,6 +20,7 @@ import { LumioMark, LumioWordmark } from "@/components/Logo";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/lib/theme";
+import { Onboarding } from "@/components/Onboarding";
 
 type NavItem = {
   to:
@@ -77,6 +78,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Tray sheet */}
       {tray && <MobileTray onClose={() => setTray(false)} />}
+
+      {/* First-visit welcome + tips (mounted once, self-hides) */}
+      <Onboarding />
     </div>
   );
 }

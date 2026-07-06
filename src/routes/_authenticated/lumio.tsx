@@ -23,6 +23,11 @@ import {
 } from "lucide-react";
 import { getUsage } from "@/lib/exam.functions";
 import { planFor } from "@/lib/plans";
+import {
+  MetricSkeleton,
+  ActivityRowSkeleton,
+  EmptyState,
+} from "@/components/Skeletons";
 
 export const Route = createFileRoute("/_authenticated/lumio")({
   head: () => ({ meta: [{ title: "Home — Lumio" }] }),
@@ -66,7 +71,7 @@ function HomePage() {
     queryFn: async () => (await supabase.auth.getUser()).data.user,
   });
 
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["materials-stats"],
     queryFn: async () => {
       const { data, error } = await supabase.from("materials").select("type, created_at, title, id").order("created_at", { ascending: false });
@@ -77,7 +82,7 @@ function HomePage() {
     },
   });
 
-  const { data: setsStats } = useQuery({
+  const { data: setsStats, isLoading: setsLoading } = useQuery({
     queryKey: ["sets-stats"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -91,7 +96,7 @@ function HomePage() {
     },
   });
 
-  const { data: attempts } = useQuery({
+  const { data: attempts, isLoading: attemptsLoading } = useQuery({
     queryKey: ["attempts"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -104,7 +109,7 @@ function HomePage() {
     },
   });
 
-  const { data: usage } = useQuery({ queryKey: ["ai-usage"], queryFn: () => getUsage() });
+  const { data: usage, isLoading: usageLoading } = useQuery({ queryKey: ["ai-usage"], queryFn: () => getUsage() });
   const plan = planFor(usage?.plan);
 
   const name =
@@ -121,6 +126,10 @@ function HomePage() {
 
   const materials = stats ? stats.counts.notes + stats.counts.homework + stats.counts.exam : null;
   const setCount = setsStats ? setsStats.counts.study + setsStats.counts.test + setsStats.counts.exam : null;
+  const activityLoading = statsLoading || setsLoading;
+  const activityEmpty =
+    !activityLoading &&
+    ((stats?.recent ?? []).length + (setsStats?.recent ?? []).length) === 0;
 
   return (
     <div className="space-y-10 animate-fade-up">
@@ -144,11 +153,19 @@ function HomePage() {
       </header>
 
       {/* Progress strip */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Metric label="Materials" value={materials ?? "—"} hint="files" to="/library" icon={FileText} />
-        <Metric label="Study sets" value={setCount ?? "—"} hint="decks & tests" to="/study" icon={BookOpenCheck} />
-        <Metric label="Avg. score" value={avgScore !== null ? `${avgScore}%` : "—"} hint={`${attempts?.length ?? 0} recent`} to="/exams" icon={TrendingUp} />
-        <Metric label="AI used" value={usage ? `${usage.used}` : "—"} hint={`of ${usage?.limit ?? "—"} · ${plan.name}`} to="/billing" icon={Zap} />
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 stagger">
+        {statsLoading ? <MetricSkeleton /> : (
+          <Metric label="Materials" value={materials ?? 0} hint="files" to="/library" icon={FileText} />
+        )}
+        {setsLoading ? <MetricSkeleton /> : (
+          <Metric label="Study sets" value={setCount ?? 0} hint="decks & tests" to="/study" icon={BookOpenCheck} />
+        )}
+        {attemptsLoading ? <MetricSkeleton /> : (
+          <Metric label="Avg. score" value={avgScore !== null ? `${avgScore}%` : "—"} hint={`${attempts?.length ?? 0} recent`} to="/exams" icon={TrendingUp} />
+        )}
+        {usageLoading ? <MetricSkeleton /> : (
+          <Metric label="AI used" value={usage ? `${usage.used}` : "—"} hint={`of ${usage?.limit ?? "—"} · ${plan.name}`} to="/billing" icon={Zap} />
+        )}
       </section>
 
       {/* Primary tiles */}
@@ -156,7 +173,7 @@ function HomePage() {
         <h2 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">
           Jump in
         </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 stagger">
           {PRIMARY.map((t) => <TileCard key={t.label} tile={t} big />)}
         </div>
       </section>
@@ -168,11 +185,34 @@ function HomePage() {
           <Link to="/library" className="text-[11px] text-primary hover:underline">View all</Link>
         </div>
         <div className="divide-y divide-border/60 -mx-1">
-          {((stats?.recent ?? []).length + (setsStats?.recent ?? []).length) === 0 ? (
-            <div className="p-5 text-center text-[13px] text-muted-foreground">
-              Nothing yet — <Link to="/library" className="text-primary font-medium hover:underline">upload a file</Link>{" "}
-              or <Link to="/study" className="text-primary font-medium hover:underline">create a study set</Link>.
-            </div>
+          {activityLoading ? (
+            <>
+              <ActivityRowSkeleton />
+              <ActivityRowSkeleton />
+              <ActivityRowSkeleton />
+            </>
+          ) : activityEmpty ? (
+            <EmptyState
+              icon={UploadIcon}
+              title="Nothing here yet"
+              description="Upload your first file or spin up a study set — we'll organize it for you."
+              action={
+                <div className="flex items-center gap-2">
+                  <Link
+                    to="/library"
+                    className="ripple inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3.5 py-1.5 text-[11.5px] font-semibold shadow-elev-1 hover:shadow-glow transition-all"
+                  >
+                    <UploadIcon className="h-3.5 w-3.5" /> Upload file
+                  </Link>
+                  <Link
+                    to="/study"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-[11.5px] font-medium hover:border-primary/40 transition-colors"
+                  >
+                    New study set
+                  </Link>
+                </div>
+              }
+            />
           ) : (
             <>
               {(setsStats?.recent ?? []).slice(0, 3).map((s) => (
@@ -206,7 +246,7 @@ function HomePage() {
         <h2 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">
           More ways to learn
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 stagger">
           {LEARN_MORE.map((t) => <TileCard key={t.label} tile={t} />)}
         </div>
       </section>
