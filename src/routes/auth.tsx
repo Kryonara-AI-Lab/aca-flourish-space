@@ -6,6 +6,7 @@ import { lovable } from "@/integrations/lovable";
 import { LumioWordmark } from "@/components/Logo";
 import { toast } from "sonner";
 import { Loader2, Mail, Lock, ShieldCheck, ArrowRight } from "lucide-react";
+import authDesk from "@/assets/auth-desk.png";
 
 const searchSchema = z.object({ mode: z.enum(["signin", "signup"]).optional() });
 
@@ -145,14 +146,67 @@ function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background lumio-paper flex flex-col">
-      <header className="max-w-6xl w-full mx-auto px-6 py-6">
+    <div className="min-h-screen bg-background lumio-paper flex flex-col overflow-hidden">
+      <header className="max-w-6xl w-full mx-auto px-6 py-6 relative z-10">
         <LumioWordmark />
       </header>
 
-      <main className="flex-1 flex items-center justify-center px-4 pb-16">
-        <div className="w-full max-w-md">
-          <div className="surface p-7 sm:p-8 animate-fade-up">
+      <main className="flex-1 flex items-center justify-center px-4 pb-16 relative">
+        {/* Ambient orbs */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            className="absolute -top-32 -left-24 h-96 w-96 rounded-full blur-3xl opacity-60"
+            style={{ background: "radial-gradient(circle, var(--aurora-1), transparent 60%)" }}
+          />
+          <div
+            className="absolute -bottom-32 -right-24 h-[28rem] w-[28rem] rounded-full blur-3xl opacity-60"
+            style={{ background: "radial-gradient(circle, var(--aurora-2), transparent 60%)" }}
+          />
+        </div>
+
+        <div className="relative w-full max-w-5xl grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-16 items-center">
+          {/* Illustration side */}
+          <div className="hidden lg:flex flex-col items-center text-center animate-fade-up">
+            <div className="relative">
+              <div
+                aria-hidden
+                className="absolute inset-0 rounded-full blur-3xl opacity-70"
+                style={{ background: "radial-gradient(circle at 50% 55%, var(--aurora-1), transparent 65%)" }}
+              />
+              <img
+                src={authDesk}
+                alt=""
+                width={520}
+                height={520}
+                className="relative w-[440px] h-[440px] object-contain float-slow select-none"
+                draggable={false}
+              />
+            </div>
+            <p className="mt-2 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Your study, illuminated</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight max-w-sm">
+              A calm home for your notes, homework and past exams.
+            </h2>
+            <div className="mt-6 flex items-center gap-6 text-[11px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-primary" /> AI tutor</span>
+              <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Flashcards</span>
+              <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> Timed exams</span>
+            </div>
+          </div>
+
+          {/* Form side */}
+          <div className="w-full max-w-md mx-auto lg:mx-0">
+            {/* Mobile illustration */}
+            <div className="lg:hidden flex justify-center mb-4 animate-fade-up">
+              <img
+                src={authDesk}
+                alt=""
+                width={220}
+                height={220}
+                className="w-40 h-40 object-contain float-slow select-none"
+                draggable={false}
+              />
+            </div>
+            <div className="glass-strong p-7 sm:p-8 animate-fade-up rounded-3xl">
             {step === "credentials" ? (
               <>
                 <h1 className="text-2xl font-bold tracking-tight">
@@ -268,13 +322,14 @@ function AuthPage() {
                 </form>
               </>
             )}
-          </div>
+            </div>
 
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            By continuing you agree to our{" "}
-            <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">Terms</Link> and{" "}
-            <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">Privacy Policy</Link>.
-          </p>
+            <p className="mt-6 text-center text-xs text-muted-foreground">
+              By continuing you agree to our{" "}
+              <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">Terms</Link> and{" "}
+              <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">Privacy Policy</Link>.
+            </p>
+          </div>
         </div>
       </main>
     </div>
