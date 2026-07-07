@@ -52,9 +52,12 @@ function WelcomeModal({ onDone, onSkip }: { onDone: () => void; onSkip: () => vo
       <button
         aria-label="Skip"
         onClick={onSkip}
-        className="absolute inset-0 bg-foreground/40 backdrop-blur-md"
+        className="absolute inset-0 bg-foreground/70 backdrop-blur-md"
       />
-      <div className="relative glass-strong w-full max-w-md p-6 sm:p-7 rounded-3xl">
+      <div
+        className="relative w-full max-w-md p-6 sm:p-7 rounded-3xl border border-border shadow-elev-3"
+        style={{ background: "var(--popover)", color: "var(--popover-foreground)" }}
+      >
         <button
           onClick={onSkip}
           aria-label="Close"
