@@ -116,7 +116,10 @@ export type Database = {
           file_name: string
           file_size: number
           id: string
+          is_pinned: boolean
+          is_public: boolean
           mime_type: string | null
+          pinned_at: string | null
           storage_path: string
           subject: string | null
           title: string
@@ -130,7 +133,10 @@ export type Database = {
           file_name: string
           file_size?: number
           id?: string
+          is_pinned?: boolean
+          is_public?: boolean
           mime_type?: string | null
+          pinned_at?: string | null
           storage_path: string
           subject?: string | null
           title: string
@@ -144,7 +150,10 @@ export type Database = {
           file_name?: string
           file_size?: number
           id?: string
+          is_pinned?: boolean
+          is_public?: boolean
           mime_type?: string | null
+          pinned_at?: string | null
           storage_path?: string
           subject?: string | null
           title?: string
