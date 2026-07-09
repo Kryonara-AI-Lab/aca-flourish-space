@@ -185,7 +185,7 @@ function AuthPage() {
 
         {/* Logos, top-left — logo_1 leads, logo_2 sits right beside it */}
         <div className="relative z-10 flex items-center gap-2 px-10 pt-10">
-          <img src="/logo_2.png" alt="" className="h-20 w-auto object-contain" />
+          <img src="/logo_2.png" alt="" className="h-50 w-auto object-contain" />
         </div>
 
         {/* Rotating expressive line, bottom-left */}
