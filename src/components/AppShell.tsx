@@ -12,29 +12,32 @@ import {
   X,
   Wifi,
   Search,
-  Bell,
   Sun,
   Moon,
   Library,
+  Users,
 } from "lucide-react";
-import { LumioMark, LumioWordmark } from "@/components/Logo";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { SpoudeMark, SpoudeWordmark } from "@/components/Logo";
+import { auth } from "@/lib/firebase";
 import { useTheme } from "@/lib/theme";
 import { Onboarding } from "@/components/Onboarding";
+import { NotificationBell } from "@/components/NotificationBell";
+import { toast } from "sonner";
 
 type NavItem = {
-  to: "/lumio" | "/library" | "/study" | "/exams" | "/billing" | "/settings" | "/profile";
+  to: string;
   label: string;
   icon: typeof Home;
   group: "learn" | "library" | "account";
+  soon?: boolean;
 };
 
 const TRAY_NAV: NavItem[] = [
   { to: "/library", label: "Library", icon: FolderOpen, group: "library" },
-  { to: "/lumio-library", label: "Lumio Library", icon: Library, group: "library" },
+  { to: "/spoude-library", label: "Spoude Library", icon: Library, group: "library" },
   { to: "/study", label: "Study", icon: BookOpenCheck, group: "learn" },
   { to: "/exams", label: "Take an exam", icon: GraduationCap, group: "learn" },
+  { to: "#tutors", label: "Hire a Tutor", icon: Users, group: "learn", soon: true },
   { to: "/billing", label: "Billing", icon: CreditCard, group: "account" },
   { to: "/settings", label: "Settings", icon: Settings, group: "account" },
 ];
@@ -48,13 +51,22 @@ const GROUP_LABELS: Record<string, string> = {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [tray, setTray] = useState(false);
+  const [showNotice, setShowNotice] = useState(false);
+
   useEffect(() => {
     setTray(false);
   }, [pathname]);
 
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem("spoude-domain-notice-dismissed");
+    if (!dismissed) {
+      setShowNotice(true);
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background lumio-paper flex flex-col">
-      {/* ==== Desktop top bar (MySchool-style) ==== */}
+    <div className="min-h-screen bg-background lumio-paper flex flex-col relative">
+      {/* ==== Desktop top bar ==== */}
       <DesktopTopBar />
 
       <div className="flex-1 flex min-h-0">
@@ -70,34 +82,50 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* ==== Desktop status bar ==== */}
       <DesktopStatusBar />
 
-      {/* ==== Mobile Instagram-style header ==== */}
+      {/* ==== Mobile Header ==== */}
       <MobileHeader />
 
-      {/* ==== Mobile bottom nav (3 buttons) ==== */}
+      {/* ==== Mobile bottom nav ==== */}
       <MobileBottomNav pathname={pathname} onPlus={() => setTray(true)} />
 
       {/* Tray sheet */}
       {tray && <MobileTray onClose={() => setTray(false)} />}
 
-      {/* First-visit welcome + tips (mounted once, self-hides) */}
+      {/* Onboarding */}
       <Onboarding />
+
+      {/* Domain Change Notification Bar */}
+      {showNotice && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-indigo-950/95 text-white backdrop-blur border-t border-indigo-500/30 py-4 px-6 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xl animate-fade-up">
+          <div className="flex items-center gap-3 text-center sm:text-left">
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <p className="text-sm font-medium">
+              Spoude is changing domains soon. Your workspace is safe & will transition seamlessly.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              sessionStorage.setItem("spoude-domain-notice-dismissed", "true");
+              setShowNotice(false);
+            }}
+            className="text-xs uppercase tracking-wider bg-white/10 hover:bg-white/20 text-white rounded-full px-4 py-1.5 font-bold transition-all"
+          >
+            Got it
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
 function DesktopTopBar() {
-  const { data: user } = useQuery({
-    queryKey: ["me"],
-    queryFn: async () => (await supabase.auth.getUser()).data.user,
-  });
-  const name =
-    (user?.user_metadata?.display_name as string | undefined) ??
-    user?.email?.split("@")[0] ??
-    "there";
+  const user = auth.currentUser;
+  const name = user?.displayName ?? user?.email?.split("@")[0] ?? "there";
+
   return (
     <header className="pc-topbar hidden lg:flex sticky top-0 z-30 items-center justify-between px-6 h-12">
       <div className="flex items-center gap-4">
-        <LumioWordmark to="/lumio" />
+        <SpoudeWordmark to="/spoude" />
         <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
           Study workspace
         </span>
@@ -106,17 +134,12 @@ function DesktopTopBar() {
         <div className="hidden xl:flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-3 py-1.5 w-72 backdrop-blur">
           <Search className="h-3.5 w-3.5 text-muted-foreground" />
           <input
-            placeholder="Search Lumio…"
+            placeholder="Search Spoude…"
             className="w-full bg-transparent outline-none text-xs placeholder:text-muted-foreground/70"
           />
         </div>
         <ThemeToggle />
-        <button
-          className="p-1.5 rounded-full hover:bg-sidebar-accent text-muted-foreground transition-colors"
-          aria-label="Notifications"
-        >
-          <Bell className="h-4 w-4" strokeWidth={1.5} />
-        </button>
+        <NotificationBell size="desktop" />
         <Link
           to="/profile"
           className="flex items-center gap-2 rounded-full px-2 py-1 hover:bg-sidebar-accent transition-colors"
@@ -149,7 +172,7 @@ function DesktopStatusBar() {
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_currentColor]" />
           Ready
         </span>
-        <span>Lumio v1.0</span>
+        <span>Spoude v1.0</span>
       </div>
       <div className="flex items-center gap-4">
         <span className="inline-flex items-center gap-1">
@@ -163,7 +186,7 @@ function DesktopStatusBar() {
 
 function DesktopSidebar({ pathname }: { pathname: string }) {
   const items: NavItem[] = [
-    { to: "/lumio", label: "Home", icon: Home, group: "library" },
+    { to: "/spoude", label: "Home", icon: Home, group: "library" },
     ...TRAY_NAV,
     { to: "/profile", label: "Profile", icon: User, group: "account" },
   ];
@@ -211,42 +234,36 @@ function MobileHeader() {
   return (
     <div className="lg:hidden fixed top-0 inset-x-0 z-40 flex items-center justify-between px-4 h-14 bg-background/75 backdrop-blur-xl border-b border-border/70">
       <div className="flex items-center gap-2">
-        <LumioMark size={24} />
+        <SpoudeMark size={24} />
         <span
           className="font-bold text-lg tracking-tight"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          Lumio
+          Spoude
         </span>
       </div>
       <div className="flex items-center gap-1">
         <button
           onClick={toggle}
           aria-label="Toggle theme"
-          className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors"
+          className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors cursor-pointer"
         >
           {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </button>
-        <Link
-          to="/lumio"
-          className="p-2 rounded-full text-muted-foreground hover:text-foreground"
-          aria-label="Notifications"
-        >
-          <Bell className="h-5 w-5" />
-        </Link>
+        <NotificationBell size="mobile" />
       </div>
     </div>
   );
 }
 
 function MobileBottomNav({ pathname, onPlus }: { pathname: string; onPlus: () => void }) {
-  const homeActive = pathname === "/lumio";
+  const homeActive = pathname === "/spoude";
   const profileActive = pathname.startsWith("/profile");
   return (
     <div className="lg:hidden fixed bottom-4 inset-x-4 z-40 pointer-events-none">
       <nav className="pointer-events-auto mx-auto max-w-sm h-16 rounded-full border border-border/70 bg-background/70 backdrop-blur-2xl shadow-elev-2 grid grid-cols-3 items-center px-6">
         <Link
-          to="/lumio"
+          to="/spoude"
           className={`flex flex-col items-center justify-center gap-0.5 transition-colors ${homeActive ? "text-primary" : "text-muted-foreground"}`}
         >
           <Home className="h-5 w-5" strokeWidth={homeActive ? 2.4 : 1.8} />
@@ -296,18 +313,37 @@ function MobileTray({ onClose }: { onClose: () => void }) {
           </button>
         </div>
         <div className="grid grid-cols-3 gap-3">
-          {TRAY_NAV.map(({ to, label, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border/70 bg-background/40 backdrop-blur-md hover:border-primary/40 hover:bg-background/60 active:scale-95 transition-all"
-            >
-              <div className="h-10 w-10 rounded-2xl bg-primary/12 text-primary flex items-center justify-center">
-                <Icon className="h-5 w-5" />
-              </div>
-              <span className="text-[11px] font-medium text-center">{label}</span>
-            </Link>
-          ))}
+          {TRAY_NAV.map(({ to, label, icon: Icon, soon }) => {
+            if (soon) {
+              return (
+                <button
+                  key={label}
+                  onClick={() => {
+                    toast.info(`${label} is coming soon!`);
+                    onClose();
+                  }}
+                  className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border/70 bg-background/40 backdrop-blur-md hover:border-primary/40 hover:bg-background/60 active:scale-95 transition-all opacity-70"
+                >
+                  <div className="h-10 w-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <span className="text-[11px] font-medium text-center">{label} (Soon)</span>
+                </button>
+              );
+            }
+            return (
+              <Link
+                key={to}
+                to={to}
+                className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border/70 bg-background/40 backdrop-blur-md hover:border-primary/40 hover:bg-background/60 active:scale-95 transition-all"
+              >
+                <div className="h-10 w-10 rounded-2xl bg-primary/12 text-primary flex items-center justify-center">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <span className="text-[11px] font-medium text-center">{label}</span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -320,7 +356,7 @@ function ThemeToggle() {
     <button
       onClick={toggle}
       aria-label="Toggle theme"
-      className="p-1.5 rounded-full hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
+      className="p-1.5 rounded-full hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
     >
       {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </button>

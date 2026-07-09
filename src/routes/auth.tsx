@@ -11,7 +11,15 @@ import {
 } from "firebase/auth";
 import { SpoudeMark } from "@/components/Logo";
 import { toast } from "sonner";
-import { Loader2, Mail, Lock, ShieldCheck, ArrowRight, User as UserIcon, HelpCircle } from "lucide-react";
+import {
+  Loader2,
+  Mail,
+  Lock,
+  ShieldCheck,
+  ArrowRight,
+  User as UserIcon,
+  HelpCircle,
+} from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const searchSchema = z.object({ mode: z.enum(["signin", "signup"]).optional() });
@@ -224,11 +232,11 @@ function AuthPage() {
           <div className="w-full max-w-sm">
             <div className="mb-8 animate-fade-up">
               <h1 className="text-[26px] font-bold tracking-tight leading-tight">
-                {mode === "signup" ? (
-                  isUniversity ? "Create University Account" : "Create your Spoude account"
-                ) : (
-                  "Welcome back to Spoude"
-                )}
+                {mode === "signup"
+                  ? isUniversity
+                    ? "Create University Account"
+                    : "Create your Spoude account"
+                  : "Welcome back to Spoude"}
               </h1>
               <p className="mt-1.5 text-[13px] text-muted-foreground max-w-xs">
                 {mode === "signup"
@@ -263,7 +271,10 @@ function AuthPage() {
 
                   <form onSubmit={submit} className="space-y-3">
                     {mode === "signup" && (
-                      <Field label={isUniversity ? "University Name" : "Name"} icon={<UserIcon className="h-4 w-4" />}>
+                      <Field
+                        label={isUniversity ? "University Name" : "Name"}
+                        icon={<UserIcon className="h-4 w-4" />}
+                      >
                         <input
                           type="text"
                           autoComplete="name"
@@ -276,7 +287,10 @@ function AuthPage() {
                         />
                       </Field>
                     )}
-                    <Field label={isUniversity ? "Administrative Email" : "Email"} icon={<Mail className="h-4 w-4" />}>
+                    <Field
+                      label={isUniversity ? "Administrative Email" : "Email"}
+                      icon={<Mail className="h-4 w-4" />}
+                    >
                       <input
                         type="email"
                         autoComplete="email"
@@ -352,7 +366,8 @@ function AuthPage() {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-[220px] p-2 text-xs">
-                            This option is for universities that want to officially upload verified study sheets and textbook guides to the public library.
+                            This option is for universities that want to officially upload verified
+                            study sheets and textbook guides to the public library.
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

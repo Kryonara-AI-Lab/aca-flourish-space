@@ -24,7 +24,10 @@ export function SpoudeMark({ size = 32 }: { size?: number }) {
       <rect x="6" y="8" width="20" height="16" rx="3" fill="url(#spoudeGradient)" />
       <path d="M12 8v16" stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.3" />
       <circle cx="16" cy="16" r="3" fill="#ffffff" fillOpacity="0.2" />
-      <polygon points="16,13 17,16 20,16 17.5,17.5 18.5,20.5 16,18.5 13.5,20.5 14.5,17.5 12,16 15,16" fill="#fbbf24" />
+      <polygon
+        points="16,13 17,16 20,16 17.5,17.5 18.5,20.5 16,18.5 13.5,20.5 14.5,17.5 12,16 15,16"
+        fill="#fbbf24"
+      />
     </svg>
   );
 }
