@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireFirebaseAuth } from "@/lib/firebase-auth-middleware";
 import { z } from "zod";
 import { PLANS, type PlanId } from "./plans";
+import { adminDb } from "@/lib/firebase.server";
+import { addUsageEvent } from "@/lib/firebase-data";
 
 const Input = z.object({
   materialId: z.string().uuid(),
@@ -21,16 +23,13 @@ function startOfMonthISO() {
 }
 
 export const generateExamFromMaterial = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireFirebaseAuth])
   .inputValidator((data: unknown) => Input.parse(data))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+    const { userId } = context;
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("plan")
-      .eq("id", userId)
-      .maybeSingle();
+    const profileSnap = await adminDb.collection("profiles").doc(userId).get();
+    const profile = profileSnap.data();
     const planId: PlanId = (profile?.plan as PlanId) in PLANS ? (profile?.plan as PlanId) : "free";
     const plan = PLANS[planId];
     if (data.count > plan.maxQuestionsPerSet) {
@@ -39,11 +38,15 @@ export const generateExamFromMaterial = createServerFn({ method: "POST" })
       );
     }
 
-    const { count: used } = await supabase
-      .from("ai_usage")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", startOfMonthISO());
-    if ((used ?? 0) >= plan.aiPerMonth) {
+    const usageSnap = await adminDb
+      .collection("ai_usage")
+      .where("user_id", "==", userId)
+      .get();
+    const used = usageSnap.docs.filter((doc) => {
+      const createdAt = doc.data().created_at as string | undefined;
+      return createdAt && createdAt >= startOfMonthISO();
+    }).length;
+    if (used >= plan.aiPerMonth) {
       throw new Error(
         `You've used all ${plan.aiPerMonth} lessons & exams on the ${plan.name} plan this month.`,
       );
@@ -52,19 +55,14 @@ export const generateExamFromMaterial = createServerFn({ method: "POST" })
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("Tutor is not configured");
 
-    const { data: mat, error: matErr } = await supabase
-      .from("materials")
-      .select("storage_path, mime_type, file_name, title, subject")
-      .eq("id", data.materialId)
-      .maybeSingle();
-    if (matErr || !mat) throw new Error("Material not found");
+    const materialSnap = await adminDb.collection("materials").doc(data.materialId).get();
+    const mat = materialSnap.data();
+    if (!materialSnap.exists || !mat) throw new Error("Material not found");
 
-    const { data: signed, error: sErr } = await supabase.storage
-      .from("materials")
-      .createSignedUrl(mat.storage_path, 120);
-    if (sErr || !signed) throw new Error("Cannot read source file");
-
-    const fileRes = await fetch(signed.signedUrl);
+    const storagePath = mat.storage_path as string;
+    const fileRes = await fetch(
+      `https://firebasestorage.googleapis.com/v0/b/${process.env.FIREBASE_PROJECT_ID || "spoude"}.firebasestorage.app/o/${encodeURIComponent(storagePath)}?alt=media`,
+    );
     if (!fileRes.ok) throw new Error("Could not download source");
     const buf = new Uint8Array(await fileRes.arrayBuffer());
     let bin = "";
@@ -131,41 +129,34 @@ Make exactly ${data.count} multiple-choice questions. All facts must come from t
       Math.min(180, Math.round(parsed.time_limit_minutes ?? items.length * 1.5)),
     );
 
-    const { data: inserted, error: insErr } = await supabase
-      .from("study_sets")
-      .insert({
-        user_id: userId,
-        kind: "exam",
-        title,
-        subject: mat.subject ?? null,
-        source_material_id: data.materialId,
-        questions: items,
-        time_limit_minutes: timeLimit,
-        ai_generated: true,
-      })
-      .select("id")
-      .single();
-    if (insErr) throw new Error(insErr.message);
+    const insertedRef = await adminDb.collection("study_sets").add({
+      user_id: userId,
+      kind: "exam",
+      title,
+      subject: mat.subject ?? null,
+      source_material_id: data.materialId,
+      questions: items,
+      time_limit_minutes: timeLimit,
+      ai_generated: true,
+      created_at: new Date().toISOString(),
+    });
 
-    await supabase.from("ai_usage").insert({ user_id: userId, kind: "exam" });
-    return { id: inserted.id, title, count: items.length, time_limit_minutes: timeLimit };
+    await addUsageEvent(userId, "exam");
+    return { id: insertedRef.id, title, count: items.length, time_limit_minutes: timeLimit };
   });
 
 export const getUsage = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireFirebaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context;
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("plan")
-      .eq("id", userId)
-      .maybeSingle();
+    const { userId } = context;
+    const profileSnap = await adminDb.collection("profiles").doc(userId).get();
+    const profile = profileSnap.data();
     const planId: PlanId = (profile?.plan as PlanId) in PLANS ? (profile?.plan as PlanId) : "free";
-    const { count } = await supabase
-      .from("ai_usage")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", startOfMonthISO());
+    const usageSnap = await adminDb.collection("ai_usage").where("user_id", "==", userId).get();
+    const used = usageSnap.docs.filter((doc) => {
+      const createdAt = doc.data().created_at as string | undefined;
+      return createdAt && createdAt >= startOfMonthISO();
+    }).length;
     const limit = PLANS[planId].aiPerMonth;
-    const used = count ?? 0;
     return { plan: planId, used, limit, remaining: Math.max(0, limit - used) };
   });

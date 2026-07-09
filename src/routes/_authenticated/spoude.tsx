@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/lib/firebase";
 import {
   BookOpenCheck,
   GraduationCap,
@@ -24,9 +24,11 @@ import {
 import { getUsage } from "@/lib/exam.functions";
 import { planFor } from "@/lib/plans";
 import { MetricSkeleton, ActivityRowSkeleton, EmptyState, Skel } from "@/components/Skeletons";
+import { getCurrentFirebaseUser } from "@/lib/firebase-data";
+import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 
 export const Route = createFileRoute("/_authenticated/spoude")({
-  head: () => ({ meta: [{ title: "Home — Lumio" }] }),
+  head: () => ({ meta: [{ title: "Home — Spoude" }] }),
   component: HomePage,
 });
 
@@ -124,20 +126,21 @@ const TYPE_META = {
 function HomePage() {
   const { data: user } = useQuery({
     queryKey: ["me"],
-    queryFn: async () => (await supabase.auth.getUser()).data.user,
+    queryFn: () => getCurrentFirebaseUser(),
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["materials-stats"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("materials")
-        .select("type, created_at, title, id")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
+      const user = await getCurrentFirebaseUser();
+      if (!user) return { counts: { notes: 0, homework: 0, exam: 0 }, recent: [] };
+      const q = query(collection(db, "materials"), where("user_id", "==", user.uid), orderBy("created_at", "desc"));
+      const snap = await getDocs(q);
+      const data = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) }));
       const counts = { notes: 0, homework: 0, exam: 0 };
       data.forEach((m) => {
-        counts[m.type as keyof typeof counts] += 1;
+        const type = (m.type as keyof typeof counts | undefined) ?? "notes";
+        if (type in counts) counts[type] += 1;
       });
       return { counts, recent: data.slice(0, 5) };
     },
@@ -146,14 +149,15 @@ function HomePage() {
   const { data: setsStats, isLoading: setsLoading } = useQuery({
     queryKey: ["sets-stats"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("study_sets")
-        .select("id,kind,title,created_at")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
+      const user = await getCurrentFirebaseUser();
+      if (!user) return { counts: { study: 0, test: 0, exam: 0 }, recent: [] };
+      const q = query(collection(db, "study_sets"), where("user_id", "==", user.uid), orderBy("created_at", "desc"));
+      const snap = await getDocs(q);
+      const data = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) }));
       const counts = { study: 0, test: 0, exam: 0 };
       data.forEach((s) => {
-        counts[s.kind as keyof typeof counts] += 1;
+        const kind = (s.kind as keyof typeof counts | undefined) ?? "study";
+        if (kind in counts) counts[kind] += 1;
       });
       return { counts, recent: data.slice(0, 4) };
     },
@@ -162,13 +166,14 @@ function HomePage() {
   const { data: attempts, isLoading: attemptsLoading } = useQuery({
     queryKey: ["attempts"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("attempts")
-        .select("score,total,completed_at")
-        .order("completed_at", { ascending: false })
-        .limit(10);
-      if (error) throw error;
-      return data ?? [];
+      const user = await getCurrentFirebaseUser();
+      if (!user) return [];
+      const q = query(collection(db, "attempts"), where("user_id", "==", user.uid), orderBy("completed_at", "desc"));
+      const snap = await getDocs(q);
+      return snap.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as Record<string, unknown>),
+      })) as Array<Record<string, unknown> & { id: string; score?: number; total?: number }>;
     },
   });
 
@@ -178,15 +183,16 @@ function HomePage() {
   });
   const plan = planFor(usage?.plan);
 
-  const name =
-    (user?.user_metadata?.display_name as string | undefined) ??
-    user?.email?.split("@")[0] ??
-    "there";
+  const name = user?.displayName?.trim() || user?.email?.split("@")[0] || "there";
 
   const avgScore =
     attempts && attempts.length > 0
       ? Math.round(
-          (attempts.reduce((a, b) => a + (b.total ? b.score / b.total : 0), 0) / attempts.length) *
+          (attempts.reduce((a, b) => {
+            const total = typeof b.total === "number" ? b.total : 0;
+            const score = typeof b.score === "number" ? b.score : 0;
+            return a + (total > 0 ? score / total : 0);
+          }, 0) / attempts.length) *
             100,
         )
       : null;
@@ -327,30 +333,34 @@ function HomePage() {
             />
           ) : (
             <>
-              {(setsStats?.recent ?? []).slice(0, 3).map((s) => (
-                <ActivityRow
-                  key={`set-${s.id}`}
-                  icon={
-                    s.kind === "study"
-                      ? BookOpenCheck
-                      : s.kind === "test"
-                        ? ListChecks
-                        : GraduationCap
-                  }
-                  title={s.title}
-                  sub={`${s.kind === "study" ? "Study set" : s.kind === "test" ? "Test" : "Exam"} · ${new Date(s.created_at).toLocaleDateString()}`}
-                  href={{ kind: "set", id: s.id }}
-                />
-              ))}
+              {(setsStats?.recent ?? []).slice(0, 3).map((s) => {
+                const kind = s.kind ?? "study";
+                return (
+                  <ActivityRow
+                    key={`set-${s.id}`}
+                    icon={
+                      kind === "study"
+                        ? BookOpenCheck
+                        : kind === "test"
+                          ? ListChecks
+                          : GraduationCap
+                    }
+                    title={s.title ?? "Untitled set"}
+                    sub={`${kind === "study" ? "Study set" : kind === "test" ? "Test" : "Exam"} · ${new Date(s.created_at ?? new Date().toISOString()).toLocaleDateString()}`}
+                    href={{ kind: "set", id: s.id }}
+                  />
+                );
+              })}
               {(stats?.recent ?? []).slice(0, 3).map((m) => {
-                const Icon = TYPE_META[m.type as keyof typeof TYPE_META]?.icon ?? BookOpen;
+                const type = (m.type as keyof typeof TYPE_META | undefined) ?? "notes";
+                const Icon = TYPE_META[type]?.icon ?? BookOpen;
                 return (
                   <ActivityRow
                     key={`mat-${m.id}`}
                     icon={Icon}
-                    title={m.title}
-                    sub={`${TYPE_META[m.type as keyof typeof TYPE_META]?.label} · ${new Date(m.created_at).toLocaleDateString()}`}
-                    href={{ kind: "material", type: m.type as "notes" | "homework" | "exam" }}
+                    title={m.title ?? "Untitled material"}
+                    sub={`${TYPE_META[type]?.label ?? "Note"} · ${new Date(m.created_at ?? new Date().toISOString()).toLocaleDateString()}`}
+                    href={{ kind: "material", type: type as "notes" | "homework" | "exam" }}
                   />
                 );
               })}
@@ -379,7 +389,7 @@ function HomePage() {
         </div>
         <h3 className="mt-2 font-semibold">Upload a file, get a full study kit</h3>
         <p className="mt-1 text-[13px] text-muted-foreground">
-          Drop a PDF into your library and Lumio will build lessons, flashcards, and exams from it.
+          Drop a PDF into your library and Spoude will build lessons, flashcards, and exams from it.
         </p>
         <Link
           to="/library"

@@ -31,11 +31,11 @@ import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const Route = createFileRoute("/_authenticated/spoude-library")({
-  head: () => ({ meta: [{ title: "Lumio Library — Discover & Share" }] }),
-  component: LumioLibrary,
+  head: () => ({ meta: [{ title: "Spoude Library — Discover & Share" }] }),
+  component: SpoudeLibrary,
 });
 
-function LumioLibrary() {
+function SpoudeLibrary() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
@@ -50,7 +50,7 @@ function LumioLibrary() {
             <Sparkles className="h-3.5 w-3.5" strokeWidth={1.5} /> Global Knowledge Base
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1]">
-            Lumio Library
+            Spoude Library
           </h1>
           <p className="text-lg md:text-xl text-primary-foreground/80 leading-relaxed max-w-xl">
             Explore thousands of student-shared notes, past exams, and academic resources. Knowledge
@@ -184,7 +184,7 @@ function LumioLibrary() {
             <div className="relative z-10 max-w-lg space-y-4">
               <h3 className="text-2xl font-bold">Advanced AI Verification</h3>
               <p className="text-white/80">
-                Every document uploaded to Lumio Library passes through our proprietary neural
+                Every document uploaded to Spoude Library passes through our proprietary neural
                 network to verify academic integrity, formatting, and content value.
               </p>
               <div className="pt-2 flex items-center gap-4">
@@ -325,8 +325,8 @@ function LumioLibrary() {
               <ShieldCheck className="h-5 w-5 text-primary" /> Library Legal & Terms
             </h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              By uploading to the Lumio Library, you agree to our Content Guidelines. You must own
-              the copyright to all shared materials. Lumio does not tolerate plagiarism or copyright
+              By uploading to the Spoude Library, you agree to our Content Guidelines. You must own
+              the copyright to all shared materials. Spoude does not tolerate plagiarism or copyright
               infringement.
             </p>
             <div className="flex flex-wrap gap-4 pt-2">
@@ -353,7 +353,7 @@ function LumioLibrary() {
           </div>
         </div>
         <div className="mt-12 text-center text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} Lumio Education. All rights reserved.
+          &copy; {new Date().getFullYear()} Spoude. All rights reserved.
         </div>
       </footer>
     </div>

@@ -1,8 +1,11 @@
-import * as admin from "firebase-admin";
+import { cert, getApps, initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
+import { getStorage } from "firebase-admin/storage";
 
 const initializeFirebaseAdmin = () => {
-  if (admin.apps.length > 0) {
-    return admin.app();
+  if (getApps().length > 0) {
+    return getApps()[0];
   }
 
   const privateKey = process.env.FIREBASE_PRIVATE_KEY
@@ -13,25 +16,25 @@ const initializeFirebaseAdmin = () => {
   const projectId = process.env.FIREBASE_PROJECT_ID || "spoude";
 
   if (privateKey && clientEmail) {
-    return admin.initializeApp({
-      credential: admin.credential.cert({
+    return initializeApp({
+      credential: cert({
         projectId,
         clientEmail,
         privateKey,
       }),
       storageBucket: `${projectId}.firebasestorage.app`,
     });
-  } else {
-    return admin.initializeApp({
-      projectId,
-      storageBucket: `${projectId}.firebasestorage.app`,
-    });
   }
+
+  return initializeApp({
+    projectId,
+    storageBucket: `${projectId}.firebasestorage.app`,
+  });
 };
 
 const adminApp = initializeFirebaseAdmin();
-const adminAuth = admin.auth(adminApp);
-const adminDb = admin.firestore(adminApp);
-const adminStorage = admin.storage(adminApp);
+const adminAuth = getAuth(adminApp);
+const adminDb = getFirestore(adminApp);
+const adminStorage = getStorage(adminApp);
 
 export { adminApp, adminAuth, adminDb, adminStorage };

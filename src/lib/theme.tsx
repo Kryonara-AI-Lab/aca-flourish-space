@@ -5,7 +5,7 @@ export type Theme = "light" | "dark";
 type Ctx = { theme: Theme; setTheme: (t: Theme) => void; toggle: () => void };
 const ThemeCtx = createContext<Ctx | null>(null);
 
-const KEY = "lumio-theme";
+const KEY = "spoude-theme";
 
 function apply(theme: Theme) {
   if (typeof document === "undefined") return;

@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { auth, db } from "@/lib/firebase";
+import { updatePassword, sendPasswordResetEmail } from "firebase/auth";
+import { collection, getDocs, query, updateDoc, where } from "firebase/firestore";
 import {
   User as UserIcon,
   Sparkles,
@@ -31,9 +33,10 @@ import { planFor } from "@/lib/plans";
 import { useRouter } from "@tanstack/react-router";
 import { StatCardSkeleton, MiniStatSkeleton } from "@/components/Skeletons";
 import { resetOnboarding } from "@/components/Onboarding";
+import { getCurrentFirebaseUser, logAccountEvent, saveProfile } from "@/lib/firebase-data";
 
 export const Route = createFileRoute("/_authenticated/profile")({
-  head: () => ({ meta: [{ title: "Profile — Lumio" }] }),
+  head: () => ({ meta: [{ title: "Profile — Spoude" }] }),
   component: ProfilePage,
 });
 
@@ -57,16 +60,11 @@ function ProfilePage() {
   const { data: me, isLoading } = useQuery({
     queryKey: ["me-full-profile"],
     queryFn: async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return null;
-      const { data } = await supabase
-        .from("profiles")
-        .select(
-          "id,username,display_name,avatar_url,bio,plan,honor_score,current_streak,longest_streak",
-        )
-        .eq("id", u.user.id)
-        .maybeSingle();
-      return { user: u.user, profile: data as Profile | null };
+      const user = await getCurrentFirebaseUser();
+      if (!user) return null;
+      const profileSnap = await import("firebase/firestore").then(({ doc, getDoc }) => getDoc(doc(db, "profiles", user.uid)));
+      const profile = profileSnap.exists() ? ({ id: profileSnap.id, ...(profileSnap.data() as Record<string, unknown>) }) : null;
+      return { user, profile: profile as Profile | null };
     },
   });
 
@@ -79,17 +77,18 @@ function ProfilePage() {
   const { data: counts, isLoading: countsLoading } = useQuery({
     queryKey: ["profile-counts"],
     queryFn: async () => {
-      const [mats, sets, atts, posts] = await Promise.all([
-        supabase.from("materials").select("id", { count: "exact", head: true }),
-        supabase.from("study_sets").select("id", { count: "exact", head: true }),
-        supabase.from("attempts").select("id", { count: "exact", head: true }),
-        supabase.from("posts").select("id", { count: "exact", head: true }),
+      const user = await getCurrentFirebaseUser();
+      if (!user) return { materials: 0, sets: 0, attempts: 0, posts: 0 };
+      const [mats, sets, atts] = await Promise.all([
+        getDocs(query(collection(db, "materials"), where("user_id", "==", user.uid))),
+        getDocs(query(collection(db, "study_sets"), where("user_id", "==", user.uid))),
+        getDocs(query(collection(db, "attempts"), where("user_id", "==", user.uid))),
       ]);
       return {
-        materials: mats.count ?? 0,
-        sets: sets.count ?? 0,
-        attempts: atts.count ?? 0,
-        posts: posts.count ?? 0,
+        materials: mats.size,
+        sets: sets.size,
+        attempts: atts.size,
+        posts: 0,
       };
     },
   });
@@ -101,11 +100,7 @@ function ProfilePage() {
 
   useEffect(() => {
     if (me?.profile) {
-      setDisplayName(
-        me.profile.display_name ??
-          (me.user.user_metadata?.display_name as string | undefined) ??
-          "",
-      );
+      setDisplayName(me.profile.display_name ?? me.user.displayName ?? "");
       setBio(me.profile.bio ?? "");
     }
   }, [me]);
@@ -129,12 +124,17 @@ function ProfilePage() {
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ display_name: displayName.trim() || null, bio: bio.trim() || null })
-      .eq("id", me.user.id);
+    try {
+      await saveProfile(me.user.uid, {
+        display_name: displayName.trim() || null,
+        bio: bio.trim() || null,
+        updated_at: new Date().toISOString(),
+      });
+    } catch (error) {
+      setSaving(false);
+      return toast.error(error instanceof Error ? error.message : "Could not save profile");
+    }
     setSaving(false);
-    if (error) return toast.error(error.message);
     toast.success("Profile updated");
     setEditing(false);
     qc.invalidateQueries({ queryKey: ["me-full-profile"] });
@@ -143,7 +143,7 @@ function ProfilePage() {
   const logout = async () => {
     await qc.cancelQueries();
     qc.clear();
-    await supabase.auth.signOut();
+    await auth.signOut();
     toast.success("Signed out");
     router.navigate({ to: "/auth", replace: true });
   };
@@ -470,24 +470,18 @@ function SecurityPanel({ email }: { email: string }) {
   const { data: events = [] } = useQuery({
     queryKey: ["account-events"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("account_events")
-        .select("id,event_type,detail,created_at")
-        .order("created_at", { ascending: false })
-        .limit(15);
-      return data ?? [];
+      const user = await getCurrentFirebaseUser();
+      if (!user) return [];
+      const q = query(collection(db, "account_events"), where("user_id", "==", user.uid));
+      const snap = await getDocs(q);
+      return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) })) as Array<{ id: string; event_type: string; detail: string | null; created_at: string }>;
     },
   });
 
   const logEvent = async (event_type: string, detail?: string) => {
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) return;
-    await supabase.from("account_events").insert({
-      user_id: u.user.id,
-      event_type,
-      detail: detail ?? null,
-      user_agent: navigator.userAgent,
-    });
+    const user = await getCurrentFirebaseUser();
+    if (!user) return;
+    await logAccountEvent(user.uid, event_type, detail);
     qc.invalidateQueries({ queryKey: ["account-events"] });
   };
 
@@ -496,9 +490,13 @@ function SecurityPanel({ email }: { email: string }) {
     if (pw.length < 8) return toast.error("Use at least 8 characters");
     if (pw !== pw2) return toast.error("Passwords don't match");
     setChanging(true);
-    const { error } = await supabase.auth.updateUser({ password: pw });
+    try {
+      await updatePassword(auth.currentUser!, pw);
+    } catch (error) {
+      setChanging(false);
+      return toast.error(error instanceof Error ? error.message : "Could not update password");
+    }
     setChanging(false);
-    if (error) return toast.error(error.message);
     toast.success("Password updated");
     setPw("");
     setPw2("");
@@ -507,10 +505,13 @@ function SecurityPanel({ email }: { email: string }) {
 
   const sendReset = async () => {
     if (!email) return;
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth`,
-    });
-    if (error) return toast.error(error.message);
+    try {
+      await sendPasswordResetEmail(auth, email, {
+        url: `${window.location.origin}/auth`,
+      });
+    } catch (error) {
+      return toast.error(error instanceof Error ? error.message : "Could not send reset email");
+    }
     toast.success("Reset link sent to your email");
   };
 

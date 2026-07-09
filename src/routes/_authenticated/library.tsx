@@ -2,7 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/lib/firebase";
+import { collection, deleteDoc, doc, getDocs, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { deleteObject, ref } from "firebase/storage";
+import { storage } from "@/lib/firebase";
 import {
   BookOpen,
   FileText,
@@ -22,11 +25,12 @@ import {
 import { toast } from "sonner";
 import { UploadDialog } from "@/components/UploadDialog";
 import { Skel } from "@/components/Skeletons";
+import { getCurrentFirebaseUser } from "@/lib/firebase-data";
 
 const searchSchema = z.object({ type: z.enum(["notes", "homework", "exam"]).optional() });
 
 export const Route = createFileRoute("/_authenticated/library")({
-  head: () => ({ meta: [{ title: "Library — Lumio" }] }),
+  head: () => ({ meta: [{ title: "Library — Spoude" }] }),
   validateSearch: searchSchema,
   component: Library,
 });
@@ -73,27 +77,28 @@ function Library() {
   const navigate = Route.useNavigate();
   const qc = useQueryClient();
   const activeType = search.type ?? "notes";
-  const [query, setQuery] = useState("");
+  const [searchText, setSearchText] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [menu, setMenu] = useState<{ material: Material; x: number; y: number } | null>(null);
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["materials", activeType],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("materials")
-        .select("*")
-        .eq("type", activeType)
-        .order("is_pinned", { ascending: false })
-        .order("pinned_at", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as Material[];
+      const user = await getCurrentFirebaseUser();
+      if (!user) return [];
+      const q = query(
+        collection(db, "materials"),
+        where("user_id", "==", user.uid),
+        where("type", "==", activeType),
+        orderBy("created_at", "desc"),
+      );
+      const snap = await getDocs(q);
+      return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) })) as Material[];
     },
   });
 
   const filtered = items.filter((m) => {
-    const q = query.trim().toLowerCase();
+    const q = searchText.trim().toLowerCase();
     if (!q) return true;
     return (
       m.title.toLowerCase().includes(q) ||
@@ -106,31 +111,22 @@ function Library() {
   const rest = filtered.filter((m) => !m.is_pinned);
 
   const download = async (m: Material) => {
-    const { data, error } = await supabase.storage
-      .from("materials")
-      .createSignedUrl(m.storage_path, 60);
-    if (error || !data) {
-      toast.error("Could not generate download link");
-      return;
-    }
-    window.open(data.signedUrl, "_blank");
+    window.open(`/api/material/${m.id}`, "_blank");
   };
 
   const togglePin = async (m: Material) => {
     const next = !m.is_pinned;
-    const { error } = await supabase
-      .from("materials")
-      .update({ is_pinned: next, pinned_at: next ? new Date().toISOString() : null })
-      .eq("id", m.id);
-    if (error) return toast.error(error.message);
+    await updateDoc(doc(db, "materials", m.id), {
+      is_pinned: next,
+      pinned_at: next ? new Date().toISOString() : null,
+    });
     toast.success(next ? "Pinned to top" : "Unpinned");
     qc.invalidateQueries({ queryKey: ["materials"] });
   };
 
   const togglePublic = async (m: Material) => {
     const next = !m.is_public;
-    const { error } = await supabase.from("materials").update({ is_public: next }).eq("id", m.id);
-    if (error) return toast.error(error.message);
+    await updateDoc(doc(db, "materials", m.id), { is_public: next });
     toast.success(next ? "Now public — anyone with the link can view" : "Set back to private");
     qc.invalidateQueries({ queryKey: ["materials"] });
   };
@@ -151,9 +147,10 @@ function Library() {
 
   const remove = async (m: Material) => {
     if (!confirm(`Delete "${m.title}"?`)) return;
-    const { error: sErr } = await supabase.storage.from("materials").remove([m.storage_path]);
-    const { error } = await supabase.from("materials").delete().eq("id", m.id);
-    if (error || sErr) {
+    try {
+      await deleteObject(ref(storage, m.storage_path));
+      await deleteDoc(doc(db, "materials", m.id));
+    } catch {
       toast.error("Could not delete");
       return;
     }
@@ -177,8 +174,8 @@ function Library() {
           <div className="flex items-center gap-2 rounded-full border border-input bg-card px-3 py-2 flex-1 sm:w-72 focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/40 transition-all">
             <Search className="h-3.5 w-3.5 text-muted-foreground" />
             <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
               placeholder="Search title, subject…"
               className="w-full bg-transparent outline-none text-sm"
             />
@@ -217,7 +214,7 @@ function Library() {
       {isLoading ? (
         <BookshelfSkeleton />
       ) : filtered.length === 0 ? (
-        <EmptyShelf onUpload={() => setUploadOpen(true)} query={query} />
+        <EmptyShelf onUpload={() => setUploadOpen(true)} query={searchText} />
       ) : (
         <>
           {pinned.length > 0 && (

@@ -2,15 +2,17 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { supabase } from "@/integrations/supabase/client";
 import { MaterialPicker, type PickerMaterial } from "@/components/MaterialPicker";
+import { getCurrentFirebaseUser } from "@/lib/firebase-data";
+import { auth, db } from "@/lib/firebase";
+import { deleteDoc, doc, getDocs, collection, query, where, orderBy } from "firebase/firestore";
 import { generateExamFromMaterial, getUsage } from "@/lib/exam.functions";
 import { planFor } from "@/lib/plans";
 import { GraduationCap, Loader2, Play, Sparkles, Timer, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/exams")({
-  head: () => ({ meta: [{ title: "Exams — Lumio" }] }),
+  head: () => ({ meta: [{ title: "Exams — Spoude" }] }),
   component: ExamsPage,
 });
 
@@ -34,13 +36,16 @@ function ExamsPage() {
   const { data: exams = [], isLoading } = useQuery({
     queryKey: ["sets", "exam"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("study_sets")
-        .select("id,title,subject,questions,time_limit_minutes,created_at")
-        .eq("kind", "exam")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as unknown as ExamRow[];
+      const user = await getCurrentFirebaseUser();
+      if (!user) return [];
+      const q = query(
+        collection(db, "study_sets"),
+        where("user_id", "==", user.uid),
+        where("kind", "==", "exam"),
+        orderBy("created_at", "desc"),
+      );
+      const snap = await getDocs(q);
+      return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) })) as ExamRow[];
     },
   });
 
@@ -66,8 +71,11 @@ function ExamsPage() {
 
   const remove = async (id: string, title: string) => {
     if (!confirm(`Delete "${title}"?`)) return;
-    const { error } = await supabase.from("study_sets").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    try {
+      await deleteDoc(doc(db, "study_sets", id));
+    } catch (error) {
+      return toast.error(error instanceof Error ? error.message : "Could not delete exam");
+    }
     toast.success("Deleted");
     qc.invalidateQueries({ queryKey: ["sets", "exam"] });
   };

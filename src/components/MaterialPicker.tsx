@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { BookOpen, FileText, GraduationCap, Search, Loader2 } from "lucide-react";
+import { getCurrentFirebaseUser, getUserMaterials } from "@/lib/firebase-data";
 
 const TYPE_META = {
   notes: { label: "Notes", icon: BookOpen },
@@ -31,12 +31,19 @@ export function MaterialPicker({
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["materials-all"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("materials")
-        .select("id,title,subject,type,file_name,mime_type")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as PickerMaterial[];
+      const user = await getCurrentFirebaseUser();
+      if (!user) return [];
+      const materials = await getUserMaterials(user.uid);
+      return materials
+        .map((m) => ({
+          id: String(m.id),
+          title: String(m.title ?? ""),
+          subject: typeof m.subject === "string" ? m.subject : null,
+          type: (m.type as PickerMaterial["type"]) ?? "notes",
+          file_name: String(m.file_name ?? ""),
+          mime_type: typeof m.mime_type === "string" ? m.mime_type : null,
+        }))
+        .sort((a, b) => String(b.id).localeCompare(String(a.id)));
     },
   });
 

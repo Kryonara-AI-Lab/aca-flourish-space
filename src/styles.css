@@ -6,7 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Lumio — Spatial Glass design system (2026-era visionOS-ish).
+ * Spoude — Spatial Glass design system (2026-era visionOS-ish).
  * Translucent panels, depth blur, soft light, one royal-blue accent.
  * Ships light (default) + dark themes. All color values in oklch.
  */
@@ -287,7 +287,7 @@
   color: transparent;
 }
 
-@keyframes lumio-fade-up {
+@keyframes spoude-fade-up {
   from {
     opacity: 0;
     transform: translateY(12px);
@@ -297,7 +297,7 @@
     transform: translateY(0);
   }
 }
-@keyframes lumio-shimmer {
+@keyframes spoude-shimmer {
   0%,
   100% {
     opacity: 0.6;
@@ -307,14 +307,14 @@
   }
 }
 @utility animate-fade-up {
-  animation: lumio-fade-up 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: spoude-fade-up 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 @utility animate-shimmer {
-  animation: lumio-shimmer 2.4s ease-in-out infinite;
+  animation: spoude-shimmer 2.4s ease-in-out infinite;
 }
 
 /* Aurora canvas — three soft color washes behind everything */
-.lumio-paper {
+.spoude-paper {
   position: relative;
   background-image:
     radial-gradient(circle at 85% 8%, var(--aurora-1), transparent 55%),
@@ -323,7 +323,7 @@
 }
 
 /* Animated gold nameplate for Pro users */
-@keyframes lumio-gold-shimmer {
+@keyframes spoude-gold-shimmer {
   0%,
   100% {
     background-position: 0% 50%;
@@ -345,11 +345,11 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: lumio-gold-shimmer 4.5s ease-in-out infinite;
+  animation: spoude-gold-shimmer 4.5s ease-in-out infinite;
   text-shadow: 0 0 24px oklch(0.85 0.18 90 / 0.15);
   filter: drop-shadow(0 1px 0 oklch(0.35 0.1 60 / 0.5));
 }
-@keyframes lumio-sparkle {
+@keyframes spoude-sparkle {
   0%,
   100% {
     opacity: 0;
@@ -361,7 +361,7 @@
   }
 }
 @utility gold-sparkle {
-  animation: lumio-sparkle 2.8s ease-in-out infinite;
+  animation: spoude-sparkle 2.8s ease-in-out infinite;
   color: var(--gold-3);
 }
 
@@ -402,7 +402,7 @@ html.dark {
 }
 
 /* Skeleton shimmer — soft blue sweep */
-@keyframes lumio-skel {
+@keyframes spoude-skel {
   0% {
     background-position: -200% 0;
   }
@@ -418,7 +418,7 @@ html.dark {
     color-mix(in oklch, var(--foreground) 4%, transparent) 100%
   );
   background-size: 200% 100%;
-  animation: lumio-skel 1.6s ease-in-out infinite;
+  animation: spoude-skel 1.6s ease-in-out infinite;
 }
 
 /* Premium pill button */
@@ -439,7 +439,7 @@ html.dark {
 }
 
 /* Onboarding tip pulses */
-@keyframes lumio-tip-ring {
+@keyframes spoude-tip-ring {
   0% {
     transform: scale(0.6);
     opacity: 0.9;
@@ -454,7 +454,7 @@ html.dark {
   height: 44px;
   border-radius: 9999px;
   border: 2px solid oklch(0.55 0.22 265 / 0.75);
-  animation: lumio-tip-ring 1.8s ease-out infinite;
+  animation: spoude-tip-ring 1.8s ease-out infinite;
 }
 .tip-bubble {
   font-size: 10.5px;
@@ -469,11 +469,11 @@ html.dark {
   backdrop-filter: blur(20px) saturate(160%);
   white-space: nowrap;
   margin-bottom: 6px;
-  animation: lumio-fade-up 400ms ease-out both;
+  animation: spoude-fade-up 400ms ease-out both;
 }
 
 /* Staggered entrance for grid children */
-@keyframes lumio-rise {
+@keyframes spoude-rise {
   from {
     opacity: 0;
     transform: translateY(10px);
@@ -485,7 +485,7 @@ html.dark {
 }
 .stagger > * {
   opacity: 0;
-  animation: lumio-rise 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: spoude-rise 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 .stagger > *:nth-child(1) {
   animation-delay: 40ms;
@@ -513,7 +513,7 @@ html.dark {
 }
 
 /* Auth split layout illustration float */
-@keyframes lumio-float {
+@keyframes spoude-float {
   0%,
   100% {
     transform: translateY(0) rotate(0deg);
@@ -523,7 +523,7 @@ html.dark {
   }
 }
 .float-slow {
-  animation: lumio-float 8s ease-in-out infinite;
+  animation: spoude-float 8s ease-in-out infinite;
 }
 
 /* Global focus polish */

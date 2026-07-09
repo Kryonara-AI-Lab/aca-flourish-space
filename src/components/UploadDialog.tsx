@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Upload as UploadIcon, Loader2, X, BookOpen, FileText, GraduationCap } from "lucide-react";
+import { getCurrentFirebaseUser, uploadMaterialToFirebase } from "@/lib/firebase-data";
 
 const TYPES = [
   { id: "notes", label: "Notes", icon: BookOpen },
@@ -35,27 +35,16 @@ export function UploadDialog({
     if (file.size > MAX_SIZE) return toast.error("File must be under 25 MB");
     setBusy(true);
     try {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) throw new Error("Not signed in");
-      const safe = file.name.replace(/[^\w.-]+/g, "_");
-      const path = `${u.user.id}/${type}/${Date.now()}-${safe}`;
-      const { error: upErr } = await supabase.storage.from("materials").upload(path, file, {
-        cacheControl: "3600",
-        upsert: false,
-        contentType: file.type || undefined,
-      });
-      if (upErr) throw upErr;
-      const { error: insErr } = await supabase.from("materials").insert({
-        user_id: u.user.id,
-        title: title.trim().slice(0, 120),
-        subject: subject.trim() || null,
+      const user = await getCurrentFirebaseUser();
+      if (!user) throw new Error("Not signed in");
+      await uploadMaterialToFirebase({
+        uid: user.uid,
         type,
-        storage_path: path,
-        file_name: file.name,
-        file_size: file.size,
-        mime_type: file.type || null,
+        title,
+        subject,
+        file,
+        description: "",
       });
-      if (insErr) throw insErr;
       toast.success("Uploaded");
       qc.invalidateQueries({ queryKey: ["materials"] });
       qc.invalidateQueries({ queryKey: ["materials-stats"] });

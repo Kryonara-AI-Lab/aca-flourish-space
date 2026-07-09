@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
 import { styleById } from "@/lib/teaching-styles";
+import { adminAuth, adminDb, adminStorage } from "@/lib/firebase.server";
+import { addUsageEvent, getMaterialDownloadUrl } from "@/lib/firebase-data";
 
 type Body = {
   materialId?: unknown;
@@ -19,9 +19,7 @@ export const Route = createFileRoute("/api/teach")({
           return new Response("Unauthorized", { status: 401 });
         }
         const apiKey = process.env.LOVABLE_API_KEY;
-        const supaUrl = process.env.SUPABASE_URL;
-        const supaKey = process.env.SUPABASE_PUBLISHABLE_KEY;
-        if (!apiKey || !supaUrl || !supaKey) {
+        if (!apiKey) {
           return new Response("Server not configured", { status: 500 });
         }
 
@@ -39,27 +37,16 @@ export const Route = createFileRoute("/api/teach")({
         const previousSummary =
           typeof body.previousSummary === "string" ? body.previousSummary.slice(0, 4000) : "";
 
-        const supabase = createClient<Database>(supaUrl, supaKey, {
-          global: { headers: { Authorization: authHeader } },
-          auth: { persistSession: false, autoRefreshToken: false },
-        });
+        const token = authHeader.replace(/^Bearer\s+/i, "");
+        const decodedToken = await adminAuth.verifyIdToken(token);
+        const uid = decodedToken.uid;
 
-        const { data: u } = await supabase.auth.getUser();
-        if (!u.user) return new Response("Unauthorized", { status: 401 });
+        const materialSnap = await adminDb.collection("materials").doc(materialId).get();
+        const mat = materialSnap.data();
+        if (!materialSnap.exists || !mat) return new Response("Not found", { status: 404 });
 
-        const { data: mat, error: matErr } = await supabase
-          .from("materials")
-          .select("storage_path, mime_type, file_name, title, subject")
-          .eq("id", materialId)
-          .maybeSingle();
-        if (matErr || !mat) return new Response("Not found", { status: 404 });
-
-        const { data: signed, error: sErr } = await supabase.storage
-          .from("materials")
-          .createSignedUrl(mat.storage_path, 120);
-        if (sErr || !signed) return new Response("Cannot read file", { status: 500 });
-
-        const fileRes = await fetch(signed.signedUrl);
+        const signedUrl = await getMaterialDownloadUrl(mat.storage_path as string);
+        const fileRes = await fetch(signedUrl);
         if (!fileRes.ok) return new Response("Could not download source", { status: 500 });
         const buf = new Uint8Array(await fileRes.arrayBuffer());
         let bin = "";
@@ -86,7 +73,7 @@ Now go DEEPER. Do not repeat what was already covered — build on it. Introduce
         const userMsg = page === 1 ? firstPageMsg : nextPageMsg;
 
         // Log usage (fire-and-forget)
-        void supabase.from("ai_usage").insert({ user_id: u.user.id, kind: "study" });
+        void addUsageEvent(uid, "study");
 
         const gwRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",

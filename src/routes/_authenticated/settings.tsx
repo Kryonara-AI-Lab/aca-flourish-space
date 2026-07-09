@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { auth } from "@/lib/firebase";
+import { getCurrentFirebaseUser, saveProfile } from "@/lib/firebase-data";
 import {
   ShieldCheck,
   ShieldOff,
@@ -28,7 +29,7 @@ import {
 } from "@/lib/voice";
 
 export const Route = createFileRoute("/_authenticated/settings")({
-  head: () => ({ meta: [{ title: "Settings — Lumio" }] }),
+  head: () => ({ meta: [{ title: "Settings — Spoude" }] }),
   component: Settings,
 });
 
@@ -60,7 +61,7 @@ function VoiceCard() {
     if (typeof window === "undefined") return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(
-      speakableText("Hello! I'll be your tutor on Lumio. Let's learn something together."),
+      speakableText("Hello! I'll be your tutor on Spoude. Let's learn something together."),
     );
     const v = voices.find((x) => x.voiceURI === prefs.voiceURI);
     if (v) u.voice = v;
@@ -201,16 +202,14 @@ function Settings() {
 
   const refreshFactors = async () => {
     setLoadingFactors(true);
-    const { data } = await supabase.auth.mfa.listFactors();
-    const verified = data?.totp?.find((f) => f.status === "verified");
-    setFactorId(verified?.id ?? null);
+    setFactorId(null);
     setLoadingFactors(false);
   };
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email ?? "");
-      setName((data.user?.user_metadata?.display_name as string | undefined) ?? "");
+    getCurrentFirebaseUser().then((user) => {
+      setEmail(user?.email ?? "");
+      setName(user?.displayName ?? "");
     });
     refreshFactors();
   }, []);
@@ -218,26 +217,22 @@ function Settings() {
   const saveName = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingName(true);
-    const { error } = await supabase.auth.updateUser({ data: { display_name: name.trim() } });
-    setSavingName(false);
-    if (error) toast.error(error.message);
-    else toast.success("Profile updated");
+    try {
+      const user = await getCurrentFirebaseUser();
+      if (!user) throw new Error("Not signed in");
+      await saveProfile(user.uid, { display_name: name.trim() || null, updated_at: new Date().toISOString() });
+      setSavingName(false);
+      toast.success("Profile updated");
+    } catch (error) {
+      setSavingName(false);
+      toast.error(error instanceof Error ? error.message : "Could not update profile");
+    }
   };
 
   const startEnroll = async () => {
     setEnrolling(true);
     try {
-      // Clean up any unverified factors first
-      const { data: list } = await supabase.auth.mfa.listFactors();
-      for (const f of list?.totp ?? []) {
-        if (f.status !== "verified") await supabase.auth.mfa.unenroll({ factorId: f.id });
-      }
-      const { data, error } = await supabase.auth.mfa.enroll({
-        factorType: "totp",
-        friendlyName: "Lumio TOTP",
-      });
-      if (error) throw error;
-      setEnrollData({ factorId: data.id, qr: data.totp.qr_code, secret: data.totp.secret });
+      setEnrollData({ factorId: "", qr: "", secret: "2FA setup is not available in this build yet." });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not start enrollment");
     } finally {
@@ -254,17 +249,7 @@ function Settings() {
     }
     setEnrolling(true);
     try {
-      const { data: ch, error: cErr } = await supabase.auth.mfa.challenge({
-        factorId: enrollData.factorId,
-      });
-      if (cErr) throw cErr;
-      const { error } = await supabase.auth.mfa.verify({
-        factorId: enrollData.factorId,
-        challengeId: ch.id,
-        code: verifyCode,
-      });
-      if (error) throw error;
-      toast.success("Two-factor authentication enabled");
+      toast.success("Two-factor authentication is not enabled in this build yet.");
       setEnrollData(null);
       setVerifyCode("");
       await refreshFactors();
@@ -278,12 +263,7 @@ function Settings() {
   const disable = async () => {
     if (!factorId) return;
     if (!confirm("Turn off two-factor authentication?")) return;
-    const { error } = await supabase.auth.mfa.unenroll({ factorId });
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Two-factor authentication disabled");
+    toast.success("Two-factor authentication is not enabled in this build yet.");
     await refreshFactors();
   };
 

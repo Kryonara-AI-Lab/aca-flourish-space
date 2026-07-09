@@ -19,6 +19,7 @@ import { Route as AcceptableUseRouteImport } from './routes/acceptable-use'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTeachRouteImport } from './routes/api/teach'
+import { Route as AuthenticatedUniversityDashboardRouteImport } from './routes/_authenticated/university-dashboard'
 import { Route as AuthenticatedStudyRouteImport } from './routes/_authenticated/study'
 import { Route as AuthenticatedSpoudeLibraryRouteImport } from './routes/_authenticated/spoude-library'
 import { Route as AuthenticatedSpoudeRouteImport } from './routes/_authenticated/spoude'
@@ -80,6 +81,12 @@ const ApiTeachRoute = ApiTeachRouteImport.update({
   path: '/api/teach',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedUniversityDashboardRoute =
+  AuthenticatedUniversityDashboardRouteImport.update({
+    id: '/university-dashboard',
+    path: '/university-dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedStudyRoute = AuthenticatedStudyRouteImport.update({
   id: '/study',
   path: '/study',
@@ -156,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/spoude': typeof AuthenticatedSpoudeRoute
   '/spoude-library': typeof AuthenticatedSpoudeLibraryRoute
   '/study': typeof AuthenticatedStudyRoute
+  '/university-dashboard': typeof AuthenticatedUniversityDashboardRoute
   '/api/teach': typeof ApiTeachRoute
   '/sets/$id': typeof AuthenticatedSetsIdRoute
 }
@@ -178,6 +186,7 @@ export interface FileRoutesByTo {
   '/spoude': typeof AuthenticatedSpoudeRoute
   '/spoude-library': typeof AuthenticatedSpoudeLibraryRoute
   '/study': typeof AuthenticatedStudyRoute
+  '/university-dashboard': typeof AuthenticatedUniversityDashboardRoute
   '/api/teach': typeof ApiTeachRoute
   '/sets/$id': typeof AuthenticatedSetsIdRoute
 }
@@ -202,6 +211,7 @@ export interface FileRoutesById {
   '/_authenticated/spoude': typeof AuthenticatedSpoudeRoute
   '/_authenticated/spoude-library': typeof AuthenticatedSpoudeLibraryRoute
   '/_authenticated/study': typeof AuthenticatedStudyRoute
+  '/_authenticated/university-dashboard': typeof AuthenticatedUniversityDashboardRoute
   '/api/teach': typeof ApiTeachRoute
   '/_authenticated/sets/$id': typeof AuthenticatedSetsIdRoute
 }
@@ -226,6 +236,7 @@ export interface FileRouteTypes {
     | '/spoude'
     | '/spoude-library'
     | '/study'
+    | '/university-dashboard'
     | '/api/teach'
     | '/sets/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/spoude'
     | '/spoude-library'
     | '/study'
+    | '/university-dashboard'
     | '/api/teach'
     | '/sets/$id'
   id:
@@ -271,6 +283,7 @@ export interface FileRouteTypes {
     | '/_authenticated/spoude'
     | '/_authenticated/spoude-library'
     | '/_authenticated/study'
+    | '/_authenticated/university-dashboard'
     | '/api/teach'
     | '/_authenticated/sets/$id'
   fileRoutesById: FileRoutesById
@@ -359,6 +372,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/teach'
       preLoaderRoute: typeof ApiTeachRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/university-dashboard': {
+      id: '/_authenticated/university-dashboard'
+      path: '/university-dashboard'
+      fullPath: '/university-dashboard'
+      preLoaderRoute: typeof AuthenticatedUniversityDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/study': {
       id: '/_authenticated/study'
@@ -451,6 +471,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSpoudeRoute: typeof AuthenticatedSpoudeRoute
   AuthenticatedSpoudeLibraryRoute: typeof AuthenticatedSpoudeLibraryRoute
   AuthenticatedStudyRoute: typeof AuthenticatedStudyRoute
+  AuthenticatedUniversityDashboardRoute: typeof AuthenticatedUniversityDashboardRoute
   AuthenticatedSetsIdRoute: typeof AuthenticatedSetsIdRoute
 }
 
@@ -465,6 +486,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSpoudeRoute: AuthenticatedSpoudeRoute,
   AuthenticatedSpoudeLibraryRoute: AuthenticatedSpoudeLibraryRoute,
   AuthenticatedStudyRoute: AuthenticatedStudyRoute,
+  AuthenticatedUniversityDashboardRoute: AuthenticatedUniversityDashboardRoute,
   AuthenticatedSetsIdRoute: AuthenticatedSetsIdRoute,
 }
 

@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { MaterialPicker, type PickerMaterial } from "@/components/MaterialPicker";
+import { auth } from "@/lib/firebase";
 import { TEACHING_STYLES, styleById } from "@/lib/teaching-styles";
 import { Markdown } from "@/components/Markdown";
 import { SpeakButton } from "@/components/SpeakButton";
@@ -37,7 +37,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/study")({
-  head: () => ({ meta: [{ title: "Study — Lumio" }] }),
+  head: () => ({ meta: [{ title: "Study — Spoude" }] }),
   component: StudyPage,
 });
 
@@ -73,9 +73,9 @@ function StudyPage() {
     abortRef.current = ctrl;
 
     try {
-      const { data: sess } = await supabase.auth.getSession();
-      const token = sess.session?.access_token;
-      if (!token) throw new Error("Not signed in");
+      const user = auth.currentUser;
+      if (!user) throw new Error("Not signed in");
+      const token = await user.getIdToken();
       const res = await fetch("/api/teach", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -295,10 +295,10 @@ function StudyPage() {
                 <div className="flex items-center justify-between gap-4 mb-2">
                   <DialogTitle>Your Library</DialogTitle>
                   <Link
-                    to="/lumio-library"
+                    to="/spoude-library"
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
                   >
-                    <Library className="h-3.5 w-3.5" /> Search Lumio Library
+                    <Library className="h-3.5 w-3.5" /> Search Spoude Library
                   </Link>
                 </div>
               </DialogHeader>
