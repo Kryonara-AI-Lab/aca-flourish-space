@@ -9,6 +9,7 @@ import {
   updateProfile,
   signInWithPopup,
 } from "firebase/auth";
+import { SpoudeMark } from "@/components/Logo";
 import { toast } from "sonner";
 import { Loader2, Mail, Lock, ShieldCheck, ArrowRight, User as UserIcon, HelpCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -160,18 +161,12 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen bg-background lg:flex">
-      {/* LEFT — brand + video + rotating expressive copy (desktop only) */}
+      {/* LEFT — brand + photo + rotating expressive copy (desktop only) */}
       <div className="relative hidden lg:flex lg:w-1/2 xl:w-3/5 flex-col justify-between overflow-hidden">
-        {/* Background video — was a CSS background-image pointed at an .mp4, which
-            never renders. A real <video> element is required to actually play it. */}
-        <video
-          className="absolute inset-0 h-full w-full object-cover"
-          src="/auth-bg.mp4"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
+        {/* Background photo, faded under a dark gradient so text stays readable */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url(/auth-bg.mp4)" }}
           aria-hidden
         />
         <div
@@ -183,9 +178,12 @@ function AuthPage() {
           aria-hidden
         />
 
-        {/* Logos, top-left — logo_1 leads, logo_2 sits right beside it */}
-        <div className="relative z-10 flex items-center gap-2 px-10 pt-10">
-          <img src="/logo_2.png" alt="" className="h-50 w-auto object-contain" />
+        {/* Logo + wordmark, top-left */}
+        <div className="relative z-10 flex items-center gap-2.5 px-10 pt-10">
+          <div className="h-10 w-10 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/15">
+            <SpoudeMark size={24} />
+          </div>
+          <span className="text-xl font-bold tracking-tight text-white">Spoude</span>
         </div>
 
         {/* Rotating expressive line, bottom-left */}
@@ -211,10 +209,15 @@ function AuthPage() {
 
       {/* RIGHT — the auth form */}
       <div className="relative flex flex-1 flex-col min-h-screen lg:min-h-0">
-        {/* Mobile-only brand row (left panel is hidden below lg) — logo_1 leads, logo_2 right beside it */}
+        {/* Mobile-only brand row (left panel is hidden below lg) */}
         <div className="flex lg:hidden items-center gap-2 px-6 pt-6">
-          <img src="/logo_1.png" alt="" className="h-11 w-auto object-contain" />
-          <img src="/logo_2.png" alt="" className="h-11 w-auto object-contain" />
+          <div
+            className="h-9 w-9 rounded-2xl border border-border flex items-center justify-center"
+            style={{ background: "var(--popover)" }}
+          >
+            <SpoudeMark size={22} />
+          </div>
+          <span className="text-lg font-bold tracking-tight">Spoude</span>
         </div>
 
         <main className="flex-1 flex items-center justify-center px-4 py-10 lg:py-0">
