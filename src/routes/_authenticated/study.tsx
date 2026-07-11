@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/lib/firebase";
 import { MaterialPicker, type PickerMaterial } from "@/components/MaterialPicker";
 import { TEACHING_STYLES, styleById } from "@/lib/teaching-styles";
 import { Markdown } from "@/components/Markdown";
@@ -56,8 +56,7 @@ function StudyPage() {
     abortRef.current = ctrl;
 
     try {
-      const { data: sess } = await supabase.auth.getSession();
-      const token = sess.session?.access_token;
+      const token = await auth.currentUser?.getIdToken();
       if (!token) throw new Error("Not signed in");
       const res = await fetch("/api/teach", {
         method: "POST",

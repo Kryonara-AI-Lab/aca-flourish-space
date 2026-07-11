@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { saveProfile } from "@/lib/firestore-db";
 import { PLANS, planFor, type PlanId } from "@/lib/plans";
 import { getUsage } from "@/lib/exam.functions";
+import { auth } from "@/lib/firebase";
 import { Check, Loader2, Sparkles, Zap } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,12 +27,17 @@ function Billing() {
 
   const upgrade = async (id: PlanId) => {
     setSwitching(id);
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) {
+    const u = auth.currentUser;
+    if (!u) {
       setSwitching(null);
       return toast.error("Sign in first");
     }
-    const { error } = await supabase.from("profiles").update({ plan: id }).eq("id", u.user.id);
+    let error: Error | null = null;
+    try {
+      await saveProfile(u.uid, { plan: id });
+    } catch (err) {
+      error = err instanceof Error ? err : new Error(String(err));
+    }
     setSwitching(null);
     if (error) return toast.error(error.message);
     toast.success(`Switched to ${PLANS[id].name}`);

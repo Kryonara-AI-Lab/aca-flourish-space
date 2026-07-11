@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/lib/firebase";
 import {
   BookOpenCheck,
   GraduationCap,
@@ -25,7 +25,7 @@ import { getUsage } from "@/lib/exam.functions";
 import { planFor } from "@/lib/plans";
 import { MetricSkeleton, ActivityRowSkeleton, EmptyState } from "@/components/Skeletons";
 
-export const Route = createFileRoute("/_authenticated/lumio")({
+export const Route = createFileRoute("/_authenticated/spoude")({
   head: () => ({ meta: [{ title: "Home — Spoude" }] }),
   component: HomePage,
 });
@@ -121,54 +121,47 @@ const TYPE_META = {
   exam: { label: "Past exams", icon: GraduationCap },
 } as const;
 
+import { getMaterials, getStudySets, getAttempts } from "@/lib/firestore-db";
+
 function HomePage() {
   const { data: user } = useQuery({
     queryKey: ["me"],
-    queryFn: async () => (await supabase.auth.getUser()).data.user,
+    queryFn: async () => auth.currentUser,
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["materials-stats"],
+    enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("materials")
-        .select("type, created_at, title, id")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      const counts = { notes: 0, homework: 0, exam: 0 };
-      data.forEach((m) => {
-        counts[m.type as keyof typeof counts] += 1;
-      });
-      return { counts, recent: data.slice(0, 5) };
+      const notes = await getMaterials(user!.uid, "notes");
+      const homework = await getMaterials(user!.uid, "homework");
+      const exam = await getMaterials(user!.uid, "exam");
+      const all = [...notes, ...homework, ...exam];
+      const counts = { notes: notes.length, homework: homework.length, exam: exam.length };
+      return { counts, recent: all.slice(0, 5) };
     },
   });
 
   const { data: setsStats, isLoading: setsLoading } = useQuery({
     queryKey: ["sets-stats"],
+    enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("study_sets")
-        .select("id,kind,title,created_at")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
+      const all = await getStudySets(user!.uid);
       const counts = { study: 0, test: 0, exam: 0 };
-      data.forEach((s) => {
-        counts[s.kind as keyof typeof counts] += 1;
+      all.forEach((s: Record<string, unknown>) => {
+        if (s.kind === "study" || s.kind === "test" || s.kind === "exam") {
+          counts[s.kind as keyof typeof counts] += 1;
+        }
       });
-      return { counts, recent: data.slice(0, 4) };
+      return { counts, recent: all.slice(0, 4) };
     },
   });
 
   const { data: attempts, isLoading: attemptsLoading } = useQuery({
     queryKey: ["attempts"],
+    enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("attempts")
-        .select("score,total,completed_at")
-        .order("completed_at", { ascending: false })
-        .limit(10);
-      if (error) throw error;
-      return data ?? [];
+      return await getAttempts(user!.uid, 10);
     },
   });
 
@@ -178,10 +171,7 @@ function HomePage() {
   });
   const plan = planFor(usage?.plan);
 
-  const name =
-    (user?.user_metadata?.display_name as string | undefined) ??
-    user?.email?.split("@")[0] ??
-    "there";
+  const name = user?.displayName ?? user?.email?.split("@")[0] ?? "there";
 
   const avgScore =
     attempts && attempts.length > 0

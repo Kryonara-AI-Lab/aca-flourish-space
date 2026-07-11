@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/lib/firebase";
+import { getMaterials } from "@/lib/firestore-db";
 import { BookOpen, FileText, GraduationCap, Search, Loader2 } from "lucide-react";
 
 const TYPE_META = {
@@ -30,13 +31,12 @@ export function MaterialPicker({
   const [q, setQ] = useState("");
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["materials-all"],
+    enabled: !!auth.currentUser?.uid,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("materials")
-        .select("id,title,subject,type,file_name,mime_type")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as PickerMaterial[];
+      const notes = await getMaterials(auth.currentUser!.uid, "notes");
+      const homework = await getMaterials(auth.currentUser!.uid, "homework");
+      const exam = await getMaterials(auth.currentUser!.uid, "exam");
+      return [...notes, ...homework, ...exam] as PickerMaterial[];
     },
   });
 

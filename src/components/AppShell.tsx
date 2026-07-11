@@ -18,12 +18,12 @@ import {
 } from "lucide-react";
 import { SpoudeMark, SpoudeWordmark } from "@/components/Logo";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/lib/firebase";
 import { useTheme } from "@/lib/theme";
 import { Onboarding } from "@/components/Onboarding";
 
 type NavItem = {
-  to: "/lumio" | "/library" | "/study" | "/exams" | "/billing" | "/settings" | "/profile";
+  to: "/spoude" | "/library" | "/study" | "/exams" | "/billing" | "/settings" | "/profile";
   label: string;
   icon: typeof Home;
   group: "learn" | "library" | "account";
@@ -86,16 +86,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 function DesktopTopBar() {
   const { data: user } = useQuery({
     queryKey: ["me"],
-    queryFn: async () => (await supabase.auth.getUser()).data.user,
+    queryFn: async () => auth.currentUser,
   });
-  const name =
-    (user?.user_metadata?.display_name as string | undefined) ??
-    user?.email?.split("@")[0] ??
-    "there";
+  const name = user?.displayName ?? user?.email?.split("@")[0] ?? "there";
   return (
     <header className="pc-topbar hidden lg:flex sticky top-0 z-30 items-center justify-between px-6 h-12">
       <div className="flex items-center gap-4">
-        <SpoudeWordmark to="/lumio" />
+        <SpoudeWordmark to="/spoude" />
         <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
           Study workspace
         </span>
@@ -161,7 +158,7 @@ function DesktopStatusBar() {
 
 function DesktopSidebar({ pathname }: { pathname: string }) {
   const items: NavItem[] = [
-    { to: "/lumio", label: "Home", icon: Home, group: "library" },
+    { to: "/spoude", label: "Home", icon: Home, group: "library" },
     ...TRAY_NAV,
     { to: "/profile", label: "Profile", icon: User, group: "account" },
   ];
@@ -223,7 +220,7 @@ function MobileHeader() {
           {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </button>
         <Link
-          to="/lumio"
+          to="/spoude"
           className="p-2 rounded-full text-muted-foreground hover:text-foreground"
           aria-label="Notifications"
         >
@@ -235,13 +232,13 @@ function MobileHeader() {
 }
 
 function MobileBottomNav({ pathname, onPlus }: { pathname: string; onPlus: () => void }) {
-  const homeActive = pathname === "/lumio";
+  const homeActive = pathname === "/spoude";
   const profileActive = pathname.startsWith("/profile");
   return (
     <div className="lg:hidden fixed bottom-4 inset-x-4 z-40 pointer-events-none">
       <nav className="pointer-events-auto mx-auto max-w-sm h-16 rounded-full border border-border/70 bg-background/70 backdrop-blur-2xl shadow-elev-2 grid grid-cols-3 items-center px-6">
         <Link
-          to="/lumio"
+          to="/spoude"
           className={`flex flex-col items-center justify-center gap-0.5 transition-colors ${homeActive ? "text-primary" : "text-muted-foreground"}`}
         >
           <Home className="h-5 w-5" strokeWidth={homeActive ? 2.4 : 1.8} />

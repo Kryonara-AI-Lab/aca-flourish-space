@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/lib/firebase";
+import { getMaterials, updateMaterial, deleteMaterial } from "@/lib/firestore-db";
 import {
   BookOpen,
   FileText,
@@ -78,16 +79,9 @@ function Library() {
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["materials", activeType],
+    enabled: !!auth.currentUser?.uid,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("materials")
-        .select("*")
-        .eq("type", activeType)
-        .order("is_pinned", { ascending: false })
-        .order("pinned_at", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as Material[];
+      return (await getMaterials(auth.currentUser!.uid, activeType)) as Material[];
     },
   });
 
@@ -105,33 +99,43 @@ function Library() {
   const rest = filtered.filter((m) => !m.is_pinned);
 
   const download = async (m: Material) => {
-    const { data, error } = await supabase.storage
-      .from("materials")
-      .createSignedUrl(m.storage_path, 60);
-    if (error || !data) {
+    // For Firebase Cloud Storage, we can use getDownloadURL from client SDK (which is public by design or standard rules)
+    // or simulate signed url by getting current download url.
+    // Let's import getDownloadURL from firebase/storage
+    const { ref, getDownloadURL } = await import("firebase/storage");
+    const { storage } = await import("@/lib/firebase");
+    try {
+      const fileRef = ref(storage, m.storage_path);
+      const url = await getDownloadURL(fileRef);
+      window.open(url, "_blank");
+    } catch (err) {
       toast.error("Could not generate download link");
-      return;
     }
-    window.open(data.signedUrl, "_blank");
   };
 
   const togglePin = async (m: Material) => {
     const next = !m.is_pinned;
-    const { error } = await supabase
-      .from("materials")
-      .update({ is_pinned: next, pinned_at: next ? new Date().toISOString() : null })
-      .eq("id", m.id);
-    if (error) return toast.error(error.message);
-    toast.success(next ? "Pinned to top" : "Unpinned");
-    qc.invalidateQueries({ queryKey: ["materials"] });
+    try {
+      await updateMaterial(m.id, {
+        is_pinned: next,
+        pinned_at: next ? new Date().toISOString() : null,
+      });
+      toast.success(next ? "Pinned to top" : "Unpinned");
+      qc.invalidateQueries({ queryKey: ["materials"] });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to toggle pin");
+    }
   };
 
   const togglePublic = async (m: Material) => {
     const next = !m.is_public;
-    const { error } = await supabase.from("materials").update({ is_public: next }).eq("id", m.id);
-    if (error) return toast.error(error.message);
-    toast.success(next ? "Now public — anyone with the link can view" : "Set back to private");
-    qc.invalidateQueries({ queryKey: ["materials"] });
+    try {
+      await updateMaterial(m.id, { is_public: next });
+      toast.success(next ? "Now public — anyone with the link can view" : "Set back to private");
+      qc.invalidateQueries({ queryKey: ["materials"] });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to update public status");
+    }
   };
 
   const copyPublicLink = async (m: Material) => {
@@ -150,15 +154,18 @@ function Library() {
 
   const remove = async (m: Material) => {
     if (!confirm(`Delete "${m.title}"?`)) return;
-    const { error: sErr } = await supabase.storage.from("materials").remove([m.storage_path]);
-    const { error } = await supabase.from("materials").delete().eq("id", m.id);
-    if (error || sErr) {
+    try {
+      const { ref, deleteObject } = await import("firebase/storage");
+      const { storage } = await import("@/lib/firebase");
+      const fileRef = ref(storage, m.storage_path);
+      await deleteObject(fileRef).catch(() => {}); // ignore storage deletion failures if file not found
+      await deleteMaterial(m.id);
+      toast.success("Deleted");
+      qc.invalidateQueries({ queryKey: ["materials"] });
+      qc.invalidateQueries({ queryKey: ["materials-stats"] });
+    } catch (error) {
       toast.error("Could not delete");
-      return;
     }
-    toast.success("Deleted");
-    qc.invalidateQueries({ queryKey: ["materials"] });
-    qc.invalidateQueries({ queryKey: ["materials-stats"] });
   };
 
   return (

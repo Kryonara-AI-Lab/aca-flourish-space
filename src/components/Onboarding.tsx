@@ -83,12 +83,13 @@ function WelcomeModal({ onDone, onSkip }: { onDone: () => void; onSkip: () => vo
             Welcome to
           </p>
           <h2 className="flex items-center gap-2 text-xl font-semibold tracking-tight">
-            Welcome to
-            <img
-              src="/logo_1.png"
-              alt="Spoude"
-              className="inline-block h-[1em] w-auto align-middle"
-            />
+            Welcome to{" "}
+            <span
+              className="font-extrabold tracking-tight bg-gradient-to-r from-[#5b7cff] to-[#2f3fd9] bg-clip-text text-transparent"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              Spoude
+            </span>
           </h2>
         </div>
 
