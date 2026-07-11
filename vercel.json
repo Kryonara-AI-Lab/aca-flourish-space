@@ -3,8 +3,6 @@
   "framework": null,
   "buildCommand": "bun run build",
   "installCommand": "bun install",
-  "outputDirectory": "dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }],
   "headers": [
     {
       "source": "/manifest.webmanifest",
