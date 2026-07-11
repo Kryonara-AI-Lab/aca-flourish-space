@@ -6,7 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Lumio — Spatial Glass design system (2026-era visionOS-ish).
+ * Spoude — Spatial Glass design system (2026-era visionOS-ish).
  * Translucent panels, depth blur, soft light, one royal-blue accent.
  * Ships light (default) + dark themes. All color values in oklch.
  */
@@ -67,7 +67,7 @@
   /* ==== LIGHT (default) — pearl white with cool tint ==== */
   --background: oklch(0.985 0.004 250);
   --foreground: oklch(0.18 0.02 260);
-  --card: oklch(1 0 0 / 0.70);
+  --card: oklch(1 0 0 / 0.7);
   --card-foreground: oklch(0.18 0.02 260);
   --popover: oklch(1 0 0 / 0.92);
   --popover-foreground: oklch(0.18 0.02 260);
@@ -78,18 +78,18 @@
   --secondary-foreground: oklch(0.22 0.02 260);
   --muted: oklch(0.95 0.006 250);
   --muted-foreground: oklch(0.48 0.015 260);
-  --accent: oklch(0.94 0.010 260);
+  --accent: oklch(0.94 0.01 260);
   --accent-foreground: oklch(0.22 0.02 260);
-  --destructive: oklch(0.60 0.22 25);
+  --destructive: oklch(0.6 0.22 25);
   --destructive-foreground: oklch(0.99 0.003 85);
-  --border: oklch(0.18 0.02 260 / 0.10);
+  --border: oklch(0.18 0.02 260 / 0.1);
   --input: oklch(0.18 0.02 260 / 0.09);
   --ring: oklch(0.55 0.22 265);
 
   --chart-1: oklch(0.55 0.22 265);
   --chart-2: oklch(0.65 0.16 200);
-  --chart-3: oklch(0.62 0.20 300);
-  --chart-4: oklch(0.70 0.18 40);
+  --chart-3: oklch(0.62 0.2 300);
+  --chart-4: oklch(0.7 0.18 40);
   --chart-5: oklch(0.58 0.16 160);
 
   --sidebar: oklch(1 0 0 / 0.55);
@@ -101,23 +101,27 @@
   --sidebar-border: oklch(0.18 0.02 260 / 0.08);
   --sidebar-ring: oklch(0.55 0.22 265);
 
-  --status-bar: oklch(1 0 0 / 0.60);
+  --status-bar: oklch(1 0 0 / 0.6);
 
   --gold-1: oklch(0.82 0.15 92);
   --gold-2: oklch(0.72 0.17 70);
   --gold-3: oklch(0.88 0.13 90);
 
   /* Elevation tuned for light */
-  --elev-1: 0 1px 0 oklch(1 0 0 / 0.6) inset, 0 1px 2px oklch(0.2 0.03 260 / 0.05), 0 4px 12px -4px oklch(0.2 0.03 260 / 0.08);
-  --elev-2: 0 1px 0 oklch(1 0 0 / 0.7) inset, 0 4px 16px oklch(0.2 0.03 260 / 0.09), 0 12px 32px -8px oklch(0.2 0.03 260 / 0.12);
+  --elev-1:
+    0 1px 0 oklch(1 0 0 / 0.6) inset, 0 1px 2px oklch(0.2 0.03 260 / 0.05),
+    0 4px 12px -4px oklch(0.2 0.03 260 / 0.08);
+  --elev-2:
+    0 1px 0 oklch(1 0 0 / 0.7) inset, 0 4px 16px oklch(0.2 0.03 260 / 0.09),
+    0 12px 32px -8px oklch(0.2 0.03 260 / 0.12);
   --elev-3: 0 1px 0 oklch(1 0 0 / 0.8) inset, 0 20px 60px -12px oklch(0.2 0.03 260 / 0.18);
-  --glow: 0 0 0 1px oklch(0.55 0.22 265 / 0.30), 0 10px 30px -8px oklch(0.55 0.22 265 / 0.45);
+  --glow: 0 0 0 1px oklch(0.55 0.22 265 / 0.3), 0 10px 30px -8px oklch(0.55 0.22 265 / 0.45);
 
   /* Glass tint (used by .glass utility) */
   --glass-tint: oklch(1 0 0 / 0.55);
   --glass-border: oklch(1 0 0 / 0.65);
   --aurora-1: oklch(0.55 0.22 265 / 0.18);
-  --aurora-2: oklch(0.70 0.18 300 / 0.14);
+  --aurora-2: oklch(0.7 0.18 300 / 0.14);
   --aurora-3: oklch(0.75 0.14 200 / 0.16);
 }
 
@@ -126,13 +130,13 @@
   /* ==== DARK — deep midnight with soft blue haze ==== */
   --background: oklch(0.11 0.012 260);
   --foreground: oklch(0.97 0.005 250);
-  --card: oklch(0.17 0.010 260 / 0.65);
+  --card: oklch(0.17 0.01 260 / 0.65);
   --card-foreground: oklch(0.97 0.005 250);
-  --popover: oklch(0.14 0.010 260 / 0.94);
+  --popover: oklch(0.14 0.01 260 / 0.94);
   --popover-foreground: oklch(0.97 0.005 250);
-  --primary: oklch(0.66 0.20 265);
-  --primary-foreground: oklch(0.10 0.02 260);
-  --primary-soft: oklch(0.66 0.20 265 / 0.16);
+  --primary: oklch(0.66 0.2 265);
+  --primary-foreground: oklch(0.1 0.02 260);
+  --primary-soft: oklch(0.66 0.2 265 / 0.16);
   --secondary: oklch(0.19 0.008 260);
   --secondary-foreground: oklch(0.94 0.005 250);
   --muted: oklch(0.17 0.008 260);
@@ -143,16 +147,16 @@
   --destructive-foreground: oklch(0.99 0.003 85);
   --border: oklch(1 0 0 / 8%);
   --input: oklch(1 0 0 / 10%);
-  --ring: oklch(0.66 0.20 265);
+  --ring: oklch(0.66 0.2 265);
 
-  --sidebar: oklch(0.10 0.010 260 / 0.55);
+  --sidebar: oklch(0.1 0.01 260 / 0.55);
   --sidebar-foreground: oklch(0.94 0.005 250);
-  --sidebar-primary: oklch(0.66 0.20 265);
-  --sidebar-primary-foreground: oklch(0.10 0.02 260);
-  --sidebar-accent: oklch(0.66 0.20 265 / 0.14);
+  --sidebar-primary: oklch(0.66 0.2 265);
+  --sidebar-primary-foreground: oklch(0.1 0.02 260);
+  --sidebar-accent: oklch(0.66 0.2 265 / 0.14);
   --sidebar-accent-foreground: oklch(0.96 0.005 250);
   --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.66 0.20 265);
+  --sidebar-ring: oklch(0.66 0.2 265);
 
   --status-bar: oklch(0.08 0.008 260 / 0.75);
 
@@ -163,10 +167,10 @@
   --elev-1: 0 1px 0 oklch(1 0 0 / 0.04) inset, 0 1px 2px oklch(0 0 0 / 0.5);
   --elev-2: 0 1px 0 oklch(1 0 0 / 0.05) inset, 0 6px 24px oklch(0 0 0 / 0.55);
   --elev-3: 0 1px 0 oklch(1 0 0 / 0.06) inset, 0 18px 60px oklch(0 0 0 / 0.65);
-  --glow: 0 0 0 1px oklch(0.66 0.20 265 / 0.40), 0 10px 34px -8px oklch(0.66 0.20 265 / 0.55);
+  --glow: 0 0 0 1px oklch(0.66 0.2 265 / 0.4), 0 10px 34px -8px oklch(0.66 0.2 265 / 0.55);
 
-  --glass-tint: oklch(0.17 0.010 260 / 0.55);
-  --glass-border: oklch(1 0 0 / 0.10);
+  --glass-tint: oklch(0.17 0.01 260 / 0.55);
+  --glass-border: oklch(1 0 0 / 0.1);
   --aurora-1: oklch(0.55 0.22 265 / 0.22);
   --aurora-2: oklch(0.55 0.18 300 / 0.16);
   --aurora-3: oklch(0.55 0.16 200 / 0.14);
@@ -187,17 +191,28 @@
     letter-spacing: -0.005em;
   }
 
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-display);
     letter-spacing: -0.025em;
     font-weight: 600;
   }
 }
 
-@utility shadow-elev-1 { box-shadow: var(--shadow-elev-1); }
-@utility shadow-elev-2 { box-shadow: var(--shadow-elev-2); }
-@utility shadow-elev-3 { box-shadow: var(--shadow-elev-3); }
-@utility shadow-glow { box-shadow: var(--shadow-glow); }
+@utility shadow-elev-1 {
+  box-shadow: var(--shadow-elev-1);
+}
+@utility shadow-elev-2 {
+  box-shadow: var(--shadow-elev-2);
+}
+@utility shadow-elev-3 {
+  box-shadow: var(--shadow-elev-3);
+}
+@utility shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
 
 @utility surface {
   background: var(--card);
@@ -205,7 +220,10 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-elev-1);
   backdrop-filter: blur(20px) saturate(160%);
-  transition: box-shadow 200ms ease, transform 200ms ease, border-color 200ms ease;
+  transition:
+    box-shadow 200ms ease,
+    transform 200ms ease,
+    border-color 200ms ease;
 }
 
 @utility surface-interactive {
@@ -214,7 +232,10 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-elev-1);
   backdrop-filter: blur(20px) saturate(160%);
-  transition: box-shadow 200ms ease, transform 200ms ease, border-color 200ms ease;
+  transition:
+    box-shadow 200ms ease,
+    transform 200ms ease,
+    border-color 200ms ease;
   &:hover {
     box-shadow: var(--shadow-elev-2);
     transform: translateY(-2px);
@@ -253,7 +274,10 @@
     transition: opacity 400ms ease;
     pointer-events: none;
   }
-  &:active::after { opacity: 1; transition: opacity 0ms; }
+  &:active::after {
+    opacity: 1;
+    transition: opacity 0ms;
+  }
 }
 
 @utility text-gradient-warm {
@@ -264,15 +288,30 @@
 }
 
 @keyframes lumio-fade-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes lumio-shimmer {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
-@utility animate-fade-up { animation: lumio-fade-up 500ms cubic-bezier(0.16, 1, 0.3, 1) both; }
-@utility animate-shimmer { animation: lumio-shimmer 2.4s ease-in-out infinite; }
+@utility animate-fade-up {
+  animation: lumio-fade-up 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@utility animate-shimmer {
+  animation: lumio-shimmer 2.4s ease-in-out infinite;
+}
 
 /* Aurora canvas — three soft color washes behind everything */
 .lumio-paper {
@@ -285,8 +324,13 @@
 
 /* Animated gold nameplate for Pro users */
 @keyframes lumio-gold-shimmer {
-  0%, 100% { background-position: 0% 50%; }
-  50%      { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 @utility gold-name {
   background-image: linear-gradient(
@@ -306,8 +350,15 @@
   filter: drop-shadow(0 1px 0 oklch(0.35 0.1 60 / 0.5));
 }
 @keyframes lumio-sparkle {
-  0%, 100% { opacity: 0; transform: scale(0.6) rotate(0deg); }
-  50%      { opacity: 1; transform: scale(1) rotate(180deg); }
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.6) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
 }
 @utility gold-sparkle {
   animation: lumio-sparkle 2.8s ease-in-out infinite;
@@ -331,29 +382,41 @@
 
 /* Mobile bottom nav plus button — floating glass pill */
 @utility fab-plus {
-  background: linear-gradient(180deg,
+  background: linear-gradient(
+    180deg,
     color-mix(in oklch, var(--color-primary) 100%, transparent),
-    color-mix(in oklch, var(--color-primary) 88%, oklch(0.3 0.15 265)));
+    color-mix(in oklch, var(--color-primary) 88%, oklch(0.3 0.15 265))
+  );
   color: var(--color-primary-foreground);
   box-shadow:
     0 1px 0 oklch(1 0 0 / 0.35) inset,
     0 12px 32px -8px oklch(0.55 0.22 265 / 0.55),
-    0 4px 10px -2px oklch(0 0 0 / 0.20);
+    0 4px 10px -2px oklch(0 0 0 / 0.2);
 }
 
-html { color-scheme: light; }
-html.dark { color-scheme: dark; }
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
 
 /* Skeleton shimmer — soft blue sweep */
 @keyframes lumio-skel {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 @utility skeleton-shimmer {
-  background: linear-gradient(90deg,
+  background: linear-gradient(
+    90deg,
     color-mix(in oklch, var(--foreground) 4%, transparent) 0%,
     color-mix(in oklch, var(--primary) 22%, transparent) 50%,
-    color-mix(in oklch, var(--foreground) 4%, transparent) 100%);
+    color-mix(in oklch, var(--foreground) 4%, transparent) 100%
+  );
   background-size: 200% 100%;
   animation: lumio-skel 1.6s ease-in-out infinite;
 }
@@ -368,22 +431,37 @@ html.dark { color-scheme: dark; }
   font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: -0.005em;
-  transition: background-color 200ms ease, transform 200ms ease, box-shadow 200ms ease, color 200ms ease;
+  transition:
+    background-color 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    color 200ms ease;
 }
 
 /* Onboarding tip pulses */
 @keyframes lumio-tip-ring {
-  0%   { transform: scale(0.6); opacity: 0.9; }
-  100% { transform: scale(2.2); opacity: 0; }
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
 }
 .tip-ring {
-  width: 44px; height: 44px; border-radius: 9999px;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
   border: 2px solid oklch(0.55 0.22 265 / 0.75);
   animation: lumio-tip-ring 1.8s ease-out infinite;
 }
 .tip-bubble {
-  font-size: 10.5px; font-weight: 600; letter-spacing: 0.01em;
-  padding: 5px 10px; border-radius: 9999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 5px 10px;
+  border-radius: 9999px;
   background: var(--card);
   color: var(--foreground);
   border: 1px solid var(--glass-border);
@@ -396,32 +474,63 @@ html.dark { color-scheme: dark; }
 
 /* Staggered entrance for grid children */
 @keyframes lumio-rise {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .stagger > * {
   opacity: 0;
   animation: lumio-rise 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-.stagger > *:nth-child(1) { animation-delay: 40ms; }
-.stagger > *:nth-child(2) { animation-delay: 90ms; }
-.stagger > *:nth-child(3) { animation-delay: 140ms; }
-.stagger > *:nth-child(4) { animation-delay: 190ms; }
-.stagger > *:nth-child(5) { animation-delay: 240ms; }
-.stagger > *:nth-child(6) { animation-delay: 290ms; }
-.stagger > *:nth-child(7) { animation-delay: 340ms; }
-.stagger > *:nth-child(8) { animation-delay: 390ms; }
+.stagger > *:nth-child(1) {
+  animation-delay: 40ms;
+}
+.stagger > *:nth-child(2) {
+  animation-delay: 90ms;
+}
+.stagger > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+.stagger > *:nth-child(4) {
+  animation-delay: 190ms;
+}
+.stagger > *:nth-child(5) {
+  animation-delay: 240ms;
+}
+.stagger > *:nth-child(6) {
+  animation-delay: 290ms;
+}
+.stagger > *:nth-child(7) {
+  animation-delay: 340ms;
+}
+.stagger > *:nth-child(8) {
+  animation-delay: 390ms;
+}
 
 /* Auth split layout illustration float */
 @keyframes lumio-float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50%      { transform: translateY(-8px) rotate(-0.4deg); }
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(-0.4deg);
+  }
 }
-.float-slow { animation: lumio-float 8s ease-in-out infinite; }
+.float-slow {
+  animation: lumio-float 8s ease-in-out infinite;
+}
 
 /* Global focus polish */
 *:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px oklch(0.55 0.22 265 / 0.55);
+  box-shadow:
+    0 0 0 2px var(--background),
+    0 0 0 4px oklch(0.55 0.22 265 / 0.55);
   border-radius: 10px;
 }

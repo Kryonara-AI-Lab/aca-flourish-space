@@ -20,7 +20,7 @@ import {
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/study")({
-  head: () => ({ meta: [{ title: "Study — Lumio" }] }),
+  head: () => ({ meta: [{ title: "Study — Spoude" }] }),
   component: StudyPage,
 });
 
@@ -181,12 +181,14 @@ function StudyPage() {
               <Markdown>{pageText}</Markdown>
             ) : (
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <Loader2 className="h-4 w-4 animate-spin" /> Reading your document and preparing the lesson…
+                <Loader2 className="h-4 w-4 animate-spin" /> Reading your document and preparing the
+                lesson…
               </div>
             )}
             {streaming && pageText && isLastPage && (
               <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse" /> writing…
+                <span className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse" />{" "}
+                writing…
               </div>
             )}
           </article>
@@ -230,29 +232,46 @@ function StudyPage() {
             <BookOpenCheck className="h-7 w-7 text-primary" /> Study
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Pick a document and a teaching style. Your tutor will read it and teach you page by page — tap
-            <span className="text-foreground font-medium"> Continue </span> for a deeper page anytime.
+            Pick a document and a teaching style. Your tutor will read it and teach you page by page
+            — tap
+            <span className="text-foreground font-medium"> Continue </span> for a deeper page
+            anytime.
           </p>
         </div>
         {usage && (
           <div className="text-xs text-muted-foreground">
-            <span className="text-foreground font-medium">{usage.used}</span> / {usage.limit} lessons & exams this month · {plan.name}
-            <Link to="/billing" className="ml-2 text-primary hover:underline">Manage</Link>
+            <span className="text-foreground font-medium">{usage.used}</span> / {usage.limit}{" "}
+            lessons & exams this month · {plan.name}
+            <Link to="/billing" className="ml-2 text-primary hover:underline">
+              Manage
+            </Link>
           </div>
         )}
       </header>
 
       <section className="surface p-6 space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">1. Choose a document</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          1. Choose a document
+        </h2>
         <MaterialPicker
           value={material?.id ?? null}
           onChange={(_id, m) => setMaterial(m)}
-          emptyHint={<span>Your library is empty. <Link to="/library" className="text-primary hover:underline">Upload one</Link> to begin.</span>}
+          emptyHint={
+            <span>
+              Your library is empty.{" "}
+              <Link to="/library" className="text-primary hover:underline">
+                Upload one
+              </Link>{" "}
+              to begin.
+            </span>
+          }
         />
       </section>
 
       <section className="surface p-6 space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">2. Pick a teaching style</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          2. Pick a teaching style
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           {TEACHING_STYLES.map((s) => {
             const active = styleId === s.id;

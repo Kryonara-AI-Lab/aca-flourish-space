@@ -19,7 +19,9 @@ function initial(): Theme {
   try {
     const stored = localStorage.getItem(KEY) as Theme | null;
     if (stored === "light" || stored === "dark") return stored;
-  } catch {}
+  } catch (e) {
+    return "light";
+  }
   return "light";
 }
 
@@ -28,7 +30,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     apply(theme);
-    try { localStorage.setItem(KEY, theme); } catch {}
+    try {
+      localStorage.setItem(KEY, theme);
+    } catch (e) {
+      void e;
+    }
   }, [theme]);
 
   const setTheme = (t: Theme) => setThemeState(t);

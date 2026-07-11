@@ -1,14 +1,7 @@
 import { cn } from "@/lib/utils";
 
 export function Skel({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        "skeleton-shimmer rounded-md",
-        className,
-      )}
-    />
-  );
+  return <div className={cn("skeleton-shimmer rounded-md", className)} />;
 }
 
 export function MetricSkeleton() {

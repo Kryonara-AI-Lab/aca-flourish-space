@@ -22,7 +22,7 @@ import {
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/sets/$id")({
-  head: () => ({ meta: [{ title: "Lumio" }] }),
+  head: () => ({ meta: [{ title: "Spoude" }] }),
   component: SetPlayPage,
 });
 
@@ -87,12 +87,20 @@ function ExamShell({ set }: { set: SetRow }) {
   const enterFs = async () => {
     const el = containerRef.current;
     if (el?.requestFullscreen) {
-      try { await el.requestFullscreen(); } catch { /* ignored */ }
+      try {
+        await el.requestFullscreen();
+      } catch {
+        /* ignored */
+      }
     }
   };
   const exitFs = async () => {
     if (document.fullscreenElement) {
-      try { await document.exitFullscreen(); } catch { /* ignored */ }
+      try {
+        await document.exitFullscreen();
+      } catch {
+        /* ignored */
+      }
     }
   };
 
@@ -113,20 +121,28 @@ function ExamShell({ set }: { set: SetRow }) {
                 <BookOpen className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-[10px] uppercase tracking-widest text-primary font-semibold">Exam</div>
+                <div className="text-[10px] uppercase tracking-widest text-primary font-semibold">
+                  Exam
+                </div>
                 <h1 className="text-2xl font-bold tracking-tight leading-tight">{set.title}</h1>
-                {set.subject && <p className="text-sm text-muted-foreground mt-0.5">{set.subject}</p>}
+                {set.subject && (
+                  <p className="text-sm text-muted-foreground mt-0.5">{set.subject}</p>
+                )}
               </div>
             </div>
           </div>
           <div className="p-6 space-y-5">
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-lg border border-border bg-card p-4">
-                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Questions</div>
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Questions
+                </div>
                 <div className="mt-1 text-2xl font-bold">{set.questions.length}</div>
               </div>
               <div className="rounded-lg border border-border bg-card p-4">
-                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Time limit</div>
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Time limit
+                </div>
                 <div className="mt-1 text-2xl font-bold flex items-center gap-1.5">
                   <Timer className="h-5 w-5 text-primary" /> {mins} min
                 </div>
@@ -137,7 +153,10 @@ function ExamShell({ set }: { set: SetRow }) {
               <div className="text-sm text-foreground/80 space-y-1.5">
                 <p className="font-medium">Before you start:</p>
                 <ul className="text-xs list-disc pl-4 space-y-0.5 text-muted-foreground">
-                  <li>The exam will open in fullscreen. Stay focused — leaving fullscreen won't submit, but it breaks concentration.</li>
+                  <li>
+                    The exam will open in fullscreen. Stay focused — leaving fullscreen won't
+                    submit, but it breaks concentration.
+                  </li>
                   <li>The timer auto-submits your exam when it runs out.</li>
                   <li>You can navigate freely between questions with the palette on the right.</li>
                 </ul>
@@ -167,7 +186,15 @@ function ExamShell({ set }: { set: SetRow }) {
             className="ripple inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium hover:border-primary/40 transition-colors"
             aria-label={isFs ? "Exit fullscreen" : "Enter fullscreen"}
           >
-            {isFs ? <><Minimize2 className="h-3.5 w-3.5" /> Exit fullscreen</> : <><Maximize2 className="h-3.5 w-3.5" /> Fullscreen</>}
+            {isFs ? (
+              <>
+                <Minimize2 className="h-3.5 w-3.5" /> Exit fullscreen
+              </>
+            ) : (
+              <>
+                <Maximize2 className="h-3.5 w-3.5" /> Fullscreen
+              </>
+            )}
           </button>
         </div>
         <QuizPlayer set={set} onExit={exitFs} />
@@ -288,7 +315,11 @@ function QuizPlayer({ set, onExit }: { set: SetRow; onExit?: () => void }) {
   }, [timed, submitted]);
 
   const score = useMemo(
-    () => answers.reduce((acc, a, idx) => acc + (a !== null && a === set.questions[idx].answer ? 1 : 0), 0),
+    () =>
+      answers.reduce(
+        (acc, a, idx) => acc + (a !== null && a === set.questions[idx].answer ? 1 : 0),
+        0,
+      ),
     [answers, set.questions],
   );
 
@@ -364,7 +395,9 @@ function QuizPlayer({ set, onExit }: { set: SetRow; onExit?: () => void }) {
                       </div>
                     )}
                     {q.explanation && (
-                      <div className="mt-2 text-xs text-muted-foreground italic">{q.explanation}</div>
+                      <div className="mt-2 text-xs text-muted-foreground italic">
+                        {q.explanation}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -414,9 +447,7 @@ function QuizPlayer({ set, onExit }: { set: SetRow; onExit?: () => void }) {
             return (
               <button
                 key={c}
-                onClick={() =>
-                  setAnswers((xs) => xs.map((v, idx) => (idx === i ? c : v)))
-                }
+                onClick={() => setAnswers((xs) => xs.map((v, idx) => (idx === i ? c : v)))}
                 className={`text-left rounded-lg border px-4 py-3 text-sm transition-all ${
                   active
                     ? "border-primary bg-primary-soft shadow-elev-1"
@@ -441,7 +472,8 @@ function QuizPlayer({ set, onExit }: { set: SetRow; onExit?: () => void }) {
         {i === total - 1 ? (
           <button
             onClick={() => {
-              if (answers.some((a) => a === null) && !confirm("Submit with unanswered questions?")) return;
+              if (answers.some((a) => a === null) && !confirm("Submit with unanswered questions?"))
+                return;
               finalize().catch((e) => toast.error(e instanceof Error ? e.message : "Failed"));
             }}
             className="ripple inline-flex items-center gap-1.5 rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm font-semibold hover:shadow-glow transition-all"

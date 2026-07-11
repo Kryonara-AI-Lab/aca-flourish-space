@@ -94,7 +94,9 @@ export function MaterialPicker({
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className={`h-8 w-8 rounded-md flex items-center justify-center shrink-0 ${active ? "bg-primary text-primary-foreground" : "bg-primary-soft text-primary"}`}>
+                  <div
+                    className={`h-8 w-8 rounded-md flex items-center justify-center shrink-0 ${active ? "bg-primary text-primary-foreground" : "bg-primary-soft text-primary"}`}
+                  >
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">

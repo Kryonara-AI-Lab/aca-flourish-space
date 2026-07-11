@@ -1,19 +1,92 @@
-.prose-tutor { color: var(--color-foreground); font-size: 1rem; line-height: 1.75; max-width: 70ch; }
-.prose-tutor h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; margin: 1.75rem 0 0.75rem; }
-.prose-tutor h3 { font-size: 1.15rem; font-weight: 600; margin: 1.25rem 0 0.5rem; }
-.prose-tutor p { margin: 0 0 0.85rem; }
-.prose-tutor strong { color: var(--color-foreground); font-weight: 700; }
-.prose-tutor em { font-style: italic; }
-.prose-tutor a { color: var(--color-primary); text-decoration: underline; }
-.prose-tutor ul, .prose-tutor ol { margin: 0 0 0.85rem 1.25rem; }
-.prose-tutor li { margin: 0.2rem 0; }
-.prose-tutor ul > li { list-style: disc; }
-.prose-tutor ol > li { list-style: decimal; }
-.prose-tutor blockquote { border-left: 3px solid var(--color-primary); background: var(--color-primary-soft, rgba(217,119,6,0.08)); margin: 0.85rem 0; padding: 0.75rem 1rem; border-radius: 0.5rem; font-style: italic; }
-.prose-tutor code { background: var(--color-secondary); padding: 0.1rem 0.35rem; border-radius: 0.3rem; font-size: 0.92em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-.prose-tutor pre { background: var(--color-secondary); padding: 0.85rem 1rem; border-radius: 0.6rem; overflow-x: auto; margin: 0.85rem 0; font-size: 0.9em; }
-.prose-tutor pre code { background: transparent; padding: 0; }
-.prose-tutor hr { border: none; border-top: 1px solid var(--color-border); margin: 1.5rem 0; }
-.prose-tutor table { border-collapse: collapse; width: 100%; margin: 0.85rem 0; font-size: 0.95em; }
-.prose-tutor th, .prose-tutor td { border: 1px solid var(--color-border); padding: 0.5rem 0.75rem; text-align: left; }
-.prose-tutor th { background: var(--color-secondary); font-weight: 600; }
+.prose-tutor {
+  color: var(--color-foreground);
+  font-size: 1rem;
+  line-height: 1.75;
+  max-width: 70ch;
+}
+.prose-tutor h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 1.75rem 0 0.75rem;
+}
+.prose-tutor h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.5rem;
+}
+.prose-tutor p {
+  margin: 0 0 0.85rem;
+}
+.prose-tutor strong {
+  color: var(--color-foreground);
+  font-weight: 700;
+}
+.prose-tutor em {
+  font-style: italic;
+}
+.prose-tutor a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+.prose-tutor ul,
+.prose-tutor ol {
+  margin: 0 0 0.85rem 1.25rem;
+}
+.prose-tutor li {
+  margin: 0.2rem 0;
+}
+.prose-tutor ul > li {
+  list-style: disc;
+}
+.prose-tutor ol > li {
+  list-style: decimal;
+}
+.prose-tutor blockquote {
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-primary-soft, rgba(217, 119, 6, 0.08));
+  margin: 0.85rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-style: italic;
+}
+.prose-tutor code {
+  background: var(--color-secondary);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.3rem;
+  font-size: 0.92em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.prose-tutor pre {
+  background: var(--color-secondary);
+  padding: 0.85rem 1rem;
+  border-radius: 0.6rem;
+  overflow-x: auto;
+  margin: 0.85rem 0;
+  font-size: 0.9em;
+}
+.prose-tutor pre code {
+  background: transparent;
+  padding: 0;
+}
+.prose-tutor hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 1.5rem 0;
+}
+.prose-tutor table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.85rem 0;
+  font-size: 0.95em;
+}
+.prose-tutor th,
+.prose-tutor td {
+  border: 1px solid var(--color-border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.prose-tutor th {
+  background: var(--color-secondary);
+  font-weight: 600;
+}

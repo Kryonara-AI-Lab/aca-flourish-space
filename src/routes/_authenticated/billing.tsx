@@ -8,7 +8,7 @@ import { Check, Loader2, Sparkles, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/billing")({
-  head: () => ({ meta: [{ title: "Billing — Lumio" }] }),
+  head: () => ({ meta: [{ title: "Billing — Spoude" }] }),
   component: Billing,
 });
 
@@ -48,7 +48,9 @@ function Billing() {
       <section className="surface p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">Current plan</div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">
+              Current plan
+            </div>
             <div className="mt-1 flex items-center gap-2">
               <h2 className="text-2xl font-bold">{currentPlan.name}</h2>
               {currentPlan.id !== "free" && (
@@ -77,7 +79,9 @@ function Billing() {
                 style={{ width: `${pct}%` }}
               />
             </div>
-            <p className="mt-1.5 text-[11px] text-muted-foreground">Resets on the 1st of each month</p>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">
+              Resets on the 1st of each month
+            </p>
           </div>
         </div>
       </section>
@@ -133,7 +137,8 @@ function Billing() {
           })}
         </div>
         <p className="mt-4 text-xs text-muted-foreground text-center">
-          Pricing is a preview — payments are not yet processed. You can switch freely to test limits.
+          Pricing is a preview — payments are not yet processed. You can switch freely to test
+          limits.
         </p>
       </section>
     </div>

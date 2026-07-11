@@ -37,7 +37,7 @@ export function UploadDialog({
     try {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Not signed in");
-      const safe = file.name.replace(/[^\w.\-]+/g, "_");
+      const safe = file.name.replace(/[^\w.-]+/g, "_");
       const path = `${u.user.id}/${type}/${Date.now()}-${safe}`;
       const { error: upErr } = await supabase.storage.from("materials").upload(path, file, {
         cacheControl: "3600",
@@ -76,7 +76,11 @@ export function UploadDialog({
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <UploadIcon className="h-4 w-4 text-primary" /> Upload to library
           </h2>
-          <button onClick={onClose} className="p-1 text-muted-foreground hover:text-foreground" aria-label="Close">
+          <button
+            onClick={onClose}
+            className="p-1 text-muted-foreground hover:text-foreground"
+            aria-label="Close"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -122,9 +126,15 @@ export function UploadDialog({
             <div className="flex items-center justify-between gap-3 rounded-lg border border-input bg-card px-3 py-3">
               <div className="min-w-0">
                 <div className="text-sm font-medium truncate">{file.name}</div>
-                <div className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(0)} KB</div>
+                <div className="text-xs text-muted-foreground">
+                  {(file.size / 1024).toFixed(0)} KB
+                </div>
               </div>
-              <button type="button" onClick={() => setFile(null)} className="p-1.5 text-muted-foreground hover:text-foreground">
+              <button
+                type="button"
+                onClick={() => setFile(null)}
+                className="p-1.5 text-muted-foreground hover:text-foreground"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -133,7 +143,9 @@ export function UploadDialog({
               <div className="rounded-lg border-2 border-dashed border-border bg-card hover:border-primary/50 hover:bg-primary-soft/30 transition-all px-6 py-8 text-center">
                 <UploadIcon className="h-5 w-5 text-primary mx-auto" />
                 <div className="mt-2 text-sm font-medium">Choose a file</div>
-                <div className="text-xs text-muted-foreground mt-0.5">PDF, docs, images · max 25 MB</div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  PDF, docs, images · max 25 MB
+                </div>
               </div>
               <input
                 type="file"
@@ -148,7 +160,11 @@ export function UploadDialog({
             disabled={busy}
             className="ripple w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-lg px-4 py-2.5 text-sm font-semibold shadow-elev-1 hover:shadow-glow transition-all disabled:opacity-60"
           >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadIcon className="h-4 w-4" />}
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <UploadIcon className="h-4 w-4" />
+            )}
             {busy ? "Uploading…" : "Upload"}
           </button>
         </form>

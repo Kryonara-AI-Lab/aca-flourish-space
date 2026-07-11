@@ -10,7 +10,7 @@ import { GraduationCap, Loader2, Play, Sparkles, Timer, Trash2 } from "lucide-re
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/exams")({
-  head: () => ({ meta: [{ title: "Exams — Lumio" }] }),
+  head: () => ({ meta: [{ title: "Exams — Spoude" }] }),
   component: ExamsPage,
 });
 
@@ -79,26 +79,43 @@ function ExamsPage() {
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <GraduationCap className="h-7 w-7 text-primary" /> Take an exam
           </h1>
-          <p className="mt-1 text-muted-foreground">Build a timed exam straight from a document in your library.</p>
+          <p className="mt-1 text-muted-foreground">
+            Build a timed exam straight from a document in your library.
+          </p>
         </div>
         {usage && (
           <div className="text-xs text-muted-foreground">
-            <span className="text-foreground font-medium">{usage.used}</span> / {usage.limit} this month · {plan.name}
-            <Link to="/billing" className="ml-2 text-primary hover:underline">Manage</Link>
+            <span className="text-foreground font-medium">{usage.used}</span> / {usage.limit} this
+            month · {plan.name}
+            <Link to="/billing" className="ml-2 text-primary hover:underline">
+              Manage
+            </Link>
           </div>
         )}
       </header>
 
       <form onSubmit={create} className="surface p-6 space-y-5">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">New exam</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          New exam
+        </h2>
         <MaterialPicker
           value={material?.id ?? null}
           onChange={(_id, m) => setMaterial(m)}
-          emptyHint={<span>No documents yet. <Link to="/library" className="text-primary hover:underline">Upload one</Link> to start.</span>}
+          emptyHint={
+            <span>
+              No documents yet.{" "}
+              <Link to="/library" className="text-primary hover:underline">
+                Upload one
+              </Link>{" "}
+              to start.
+            </span>
+          }
         />
         <div className="flex flex-col sm:flex-row sm:items-end gap-3">
           <div className="flex-1">
-            <label className="block text-xs font-medium text-muted-foreground mb-1.5">Number of questions</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+              Number of questions
+            </label>
             <input
               type="number"
               min={5}
@@ -107,27 +124,37 @@ function ExamsPage() {
               onChange={(e) => setCount(Math.max(5, Math.min(50, Number(e.target.value) || 0)))}
               className="w-full rounded-lg border border-input bg-card px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/40 transition-all"
             />
-            <p className="mt-1 text-[11px] text-muted-foreground">Time limit is chosen for you based on how many questions you pick.</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              Time limit is chosen for you based on how many questions you pick.
+            </p>
           </div>
           <button
             type="submit"
             disabled={!material || creating}
             className="ripple inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-lg px-5 py-3 text-sm font-semibold shadow-elev-1 hover:shadow-glow transition-all disabled:opacity-50"
           >
-            {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {creating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
             {creating ? "Preparing…" : "Create exam"}
           </button>
         </div>
       </form>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Your exams</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          Your exams
+        </h2>
         {isLoading ? (
           <div className="surface p-10 flex items-center justify-center text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
           </div>
         ) : exams.length === 0 ? (
-          <div className="surface p-10 text-center text-sm text-muted-foreground">No exams yet — create one above.</div>
+          <div className="surface p-10 text-center text-sm text-muted-foreground">
+            No exams yet — create one above.
+          </div>
         ) : (
           <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {exams.map((s) => (
@@ -137,7 +164,9 @@ function ExamsPage() {
                 <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
                   <span>{(s.questions as unknown[]).length} questions</span>
                   {s.time_limit_minutes && (
-                    <span className="inline-flex items-center gap-1"><Timer className="h-3 w-3" /> {s.time_limit_minutes} min</span>
+                    <span className="inline-flex items-center gap-1">
+                      <Timer className="h-3 w-3" /> {s.time_limit_minutes} min
+                    </span>
                   )}
                 </div>
                 <div className="mt-4 flex items-center gap-2">

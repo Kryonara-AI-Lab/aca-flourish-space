@@ -26,11 +26,17 @@ export const generateExamFromMaterial = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const { data: profile } = await supabase.from("profiles").select("plan").eq("id", userId).maybeSingle();
-    const planId: PlanId = ((profile?.plan as PlanId) in PLANS ? (profile?.plan as PlanId) : "free");
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("plan")
+      .eq("id", userId)
+      .maybeSingle();
+    const planId: PlanId = (profile?.plan as PlanId) in PLANS ? (profile?.plan as PlanId) : "free";
     const plan = PLANS[planId];
     if (data.count > plan.maxQuestionsPerSet) {
-      throw new Error(`Your ${plan.name} plan caps exams at ${plan.maxQuestionsPerSet} questions. Upgrade in Billing.`);
+      throw new Error(
+        `Your ${plan.name} plan caps exams at ${plan.maxQuestionsPerSet} questions. Upgrade in Billing.`,
+      );
     }
 
     const { count: used } = await supabase
@@ -38,7 +44,9 @@ export const generateExamFromMaterial = createServerFn({ method: "POST" })
       .select("*", { count: "exact", head: true })
       .gte("created_at", startOfMonthISO());
     if ((used ?? 0) >= plan.aiPerMonth) {
-      throw new Error(`You've used all ${plan.aiPerMonth} lessons & exams on the ${plan.name} plan this month.`);
+      throw new Error(
+        `You've used all ${plan.aiPerMonth} lessons & exams on the ${plan.name} plan this month.`,
+      );
     }
 
     const apiKey = process.env.LOVABLE_API_KEY;
@@ -104,7 +112,11 @@ Make exactly ${data.count} multiple-choice questions. All facts must come from t
     const content = payload.choices?.[0]?.message?.content ?? "{}";
 
     let parsed: { title?: string; time_limit_minutes?: number; items?: unknown };
-    try { parsed = JSON.parse(content); } catch { throw new Error("Exam returned invalid JSON"); }
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      throw new Error("Exam returned invalid JSON");
+    }
     const items = (Array.isArray(parsed.items) ? parsed.items : [])
       .map((it) => QuestionSchema.safeParse(it))
       .filter((r): r is { success: true; data: z.infer<typeof QuestionSchema> } => r.success)
@@ -112,8 +124,12 @@ Make exactly ${data.count} multiple-choice questions. All facts must come from t
       .slice(0, data.count);
     if (items.length === 0) throw new Error("Couldn't extract questions from this material.");
 
-    const title = (typeof parsed.title === "string" && parsed.title.trim()) || mat.title.slice(0, 60);
-    const timeLimit = Math.max(5, Math.min(180, Math.round(parsed.time_limit_minutes ?? items.length * 1.5)));
+    const title =
+      (typeof parsed.title === "string" && parsed.title.trim()) || mat.title.slice(0, 60);
+    const timeLimit = Math.max(
+      5,
+      Math.min(180, Math.round(parsed.time_limit_minutes ?? items.length * 1.5)),
+    );
 
     const { data: inserted, error: insErr } = await supabase
       .from("study_sets")
@@ -139,8 +155,12 @@ export const getUsage = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const { data: profile } = await supabase.from("profiles").select("plan").eq("id", userId).maybeSingle();
-    const planId: PlanId = ((profile?.plan as PlanId) in PLANS ? (profile?.plan as PlanId) : "free");
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("plan")
+      .eq("id", userId)
+      .maybeSingle();
+    const planId: PlanId = (profile?.plan as PlanId) in PLANS ? (profile?.plan as PlanId) : "free";
     const { count } = await supabase
       .from("ai_usage")
       .select("*", { count: "exact", head: true })

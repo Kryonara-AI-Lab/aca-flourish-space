@@ -26,12 +26,18 @@ export const Route = createFileRoute("/api/teach")({
         }
 
         let body: Body;
-        try { body = (await request.json()) as Body; } catch { return new Response("Bad JSON", { status: 400 }); }
+        try {
+          body = (await request.json()) as Body;
+        } catch {
+          return new Response("Bad JSON", { status: 400 });
+        }
         const materialId = typeof body.materialId === "string" ? body.materialId : null;
         const styleIdRaw = typeof body.styleId === "string" ? body.styleId : null;
         if (!materialId) return new Response("materialId required", { status: 400 });
-        const page = typeof body.page === "number" && body.page > 0 ? Math.min(20, Math.floor(body.page)) : 1;
-        const previousSummary = typeof body.previousSummary === "string" ? body.previousSummary.slice(0, 4000) : "";
+        const page =
+          typeof body.page === "number" && body.page > 0 ? Math.min(20, Math.floor(body.page)) : 1;
+        const previousSummary =
+          typeof body.previousSummary === "string" ? body.previousSummary.slice(0, 4000) : "";
 
         const supabase = createClient<Database>(supaUrl, supaKey, {
           global: { headers: { Authorization: authHeader } },
